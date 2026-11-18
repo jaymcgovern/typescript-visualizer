@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -26,13 +27,16 @@ import {
 const REF_DESCRIPTION =
   "A declaration id (from another tool's output), a name (`Dog`), or a qualified name (`NS.Inner`).";
 
+/** Reported to clients; read from package.json (next to both src/ and dist/) so it tracks releases. */
+const PACKAGE_VERSION: string = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+
 /**
  * MCP tools over the declaration graph. `load` builds the graph; it runs once
  * now and again on every `refresh_graph` call.
  */
 export function createServer(load: () => Graph): McpServer {
   let index = new GraphIndex(load());
-  const server = new McpServer({ name: "ts-graph", version: "1.0.0" });
+  const server = new McpServer({ name: "tsviz-mcp", version: PACKAGE_VERSION });
 
   const summaryResult = (): CallToolResult => {
     const s = summary(index);

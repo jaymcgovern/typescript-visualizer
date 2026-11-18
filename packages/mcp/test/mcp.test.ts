@@ -32,6 +32,12 @@ afterAll(async () => {
   await client.close();
 });
 
+describe("server", () => {
+  it("identifies as tsviz-mcp at the package version", () => {
+    expect(client.getServerVersion()).toMatchObject({ name: "tsviz-mcp", version: "0.1.0" });
+  });
+});
+
 function textOf(result: Awaited<ReturnType<Client["callTool"]>>): string {
   const content = result.content as { type: string; text: string }[];
 

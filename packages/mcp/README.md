@@ -7,7 +7,7 @@ same arguments as the `tsviz-graph` CLI.
 For Claude Code:
 
 ```sh
-claude mcp add ts-graph -- npx -y @tsviz/mcp "src/**/*.ts" --root /path/to/project
+claude mcp add tsviz -- npx -y @tsviz/mcp "src/**/*.ts" --root /path/to/project
 ```
 
 | tool                | purpose                                                                                     |
