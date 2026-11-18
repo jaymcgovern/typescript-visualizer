@@ -1,0 +1,151 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+
+  --bg: light-dark(#ffffff, #0d1117);
+  --fg: light-dark(#1f2328, #e6edf3);
+  --muted: light-dark(#656d76, #8d96a0);
+  --surface: light-dark(#f6f8fa, #161b22);
+  --border: light-dark(#d0d7de, #30363d);
+  --error-bg: light-dark(#ffebe9, #3c1618);
+  --error-fg: light-dark(#82071e, #ffa198);
+  --warn-bg: light-dark(#fff8c5, #3b2e00);
+  --warn-fg: light-dark(#4d2d00, #e3b341);
+  --accent: light-dark(#0969da, #4493f8);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.toolbar h1 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.toolbar__info {
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar__spacer {
+  flex: 1;
+}
+
+button,
+select {
+  font: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover:not(:disabled),
+select:hover {
+  border-color: var(--muted);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.toolbar__field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+}
+
+.banner--error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+}
+
+.banner--warn {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.canvas {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  color: var(--muted);
+}
+
+.loading-chip {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  z-index: 10;
+}
+
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border: 3px dashed var(--accent);
+  font-size: 18px;
+  z-index: 20;
+  pointer-events: none;
+}

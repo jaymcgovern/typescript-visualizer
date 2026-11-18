@@ -1,0 +1,79 @@
+name: Publish packages
+
+# Run manually from the GitHub UI: Actions → "Publish packages" → Run workflow.
+# Publishes each @tsviz/* package whose package.json version isn't on npm yet.
+# Bump versions first with `npm run version-packages` (Changesets) and merge to
+# main; this workflow never edits versions. See .changeset/README.md.
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run (build, test and pack, but don't publish)"
+        type: boolean
+        default: true
+      tag:
+        description: "npm dist-tag"
+        type: choice
+        options: [latest, next]
+        default: latest
+
+# Never run two publishes at once.
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # for npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only publish from main
+        if: ${{ !inputs.dry-run && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::Real publishes must run from main (got ${{ github.ref }}). Use a dry run on other branches."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry-run }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          # Dependency order: graph first, then the packages that depend on it.
+          for dir in packages/graph packages/parser packages/mcp packages/ui; do
+            name=$(node -p "require('./$dir/package.json').name")
+            version=$(node -p "require('./$dir/package.json').version")
+
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "⏭  $name@$version is already on npm, skipping"
+              continue
+            fi
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "🧪 Would publish $name@$version (tag: $TAG)"
+              npm publish -w "$dir" --access public --tag "$TAG" --dry-run
+            else
+              echo "🚀 Publishing $name@$version (tag: $TAG)"
+              npm publish -w "$dir" --access public --tag "$TAG" --provenance
+              echo "- \`$name@$version\` → \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done

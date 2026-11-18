@@ -1,0 +1,1115 @@
+/*
+ * @tsviz/ui styles. Everything is scoped under `.tsviz`, the root element
+ * GraphCanvas renders, so nothing leaks into the host app.
+ *
+ * Theme with the `--tsviz-*` custom properties below, or the `theme` prop.
+ * Colours use light-dark(): the `colorScheme` prop sets `color-scheme` on the
+ * root, and "auto" follows the user's preference.
+ */
+.tsviz {
+  color-scheme: light dark;
+  --tsviz-font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tsviz-bg: light-dark(#ffffff, #0d1117);
+  --tsviz-fg: light-dark(#1f2328, #e6edf3);
+  --tsviz-muted: light-dark(#656d76, #8d96a0);
+  --tsviz-surface: light-dark(#f6f8fa, #161b22);
+  --tsviz-border: light-dark(#d0d7de, #30363d);
+  --tsviz-error-bg: light-dark(#ffebe9, #3c1618);
+  --tsviz-error-fg: light-dark(#82071e, #ffa198);
+  --tsviz-warn-bg: light-dark(#fff8c5, #3b2e00);
+  --tsviz-warn-fg: light-dark(#4d2d00, #e3b341);
+  --tsviz-kind-interface: light-dark(#0969da, #4493f8);
+  --tsviz-kind-class: light-dark(#8250df, #ab7df8);
+  --tsviz-kind-type: light-dark(#1a7f37, #3fb950);
+  --tsviz-kind-enum: light-dark(#bc4c00, #f0883e);
+  --tsviz-kind-function: light-dark(#bf3989, #db61a2);
+  --tsviz-kind-variable: light-dark(#6e7781, #9198a1);
+  --tsviz-kind-namespace: light-dark(#9a6700, #d29922);
+  --tsviz-kind-external: light-dark(#8c959f, #6e7681);
+  --tsviz-card-bg: light-dark(#ffffff, #161b22);
+  /* How much of the kind colour tints a card's header; not a colour, so dark sets it below. */
+  --tsviz-head-tint: 10%;
+  --tsviz-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --tsviz-rel-inherit: light-dark(#1f2328, #e6edf3);
+  --tsviz-rel-structure: light-dark(#0a7d87, #39c5cf);
+  --tsviz-rel-signature: light-dark(#9a6700, #d29922);
+  --tsviz-rel-composition: light-dark(#cf222e, #ff7b72);
+  --tsviz-rel-reference: light-dark(#8c959f, #7d8590);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  font-family: var(--tsviz-font-sans);
+  font-size: 14px;
+  color: var(--tsviz-fg);
+  background: var(--tsviz-bg);
+}
+
+.tsviz[data-color-scheme="light"] {
+  color-scheme: light;
+}
+
+.tsviz[data-color-scheme="dark"] {
+  color-scheme: dark;
+  --tsviz-head-tint: 16%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tsviz:not([data-color-scheme="light"]) {
+    --tsviz-head-tint: 16%;
+  }
+}
+
+.tsviz,
+.tsviz * {
+  box-sizing: border-box;
+}
+
+/*
+ * Base rules the components rely on. `:where()` keeps their specificity at an
+ * element selector's, so React Flow's own classes (e.g. its zoom controls) win.
+ */
+:where(.tsviz) button,
+:where(.tsviz) select {
+  font: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 6px;
+  background: var(--tsviz-bg);
+  color: var(--tsviz-fg);
+}
+
+:where(.tsviz) button {
+  cursor: pointer;
+}
+
+:where(.tsviz) button:hover:not(:disabled),
+:where(.tsviz) select:hover {
+  border-color: var(--tsviz-muted);
+}
+
+:where(.tsviz) button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tsviz .tsviz__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  color: var(--tsviz-muted);
+}
+
+.tsviz .react-flow__minimap-node.decl {
+  fill: var(--tsviz-kind-color);
+}
+
+.tsviz .decl--interface {
+  --tsviz-kind-color: var(--tsviz-kind-interface);
+}
+.tsviz .decl--class {
+  --tsviz-kind-color: var(--tsviz-kind-class);
+}
+.tsviz .decl--type {
+  --tsviz-kind-color: var(--tsviz-kind-type);
+}
+.tsviz .decl--enum {
+  --tsviz-kind-color: var(--tsviz-kind-enum);
+}
+.tsviz .decl--function {
+  --tsviz-kind-color: var(--tsviz-kind-function);
+}
+.tsviz .decl--variable {
+  --tsviz-kind-color: var(--tsviz-kind-variable);
+}
+.tsviz .decl--namespace {
+  --tsviz-kind-color: var(--tsviz-kind-namespace);
+}
+.tsviz .decl--external {
+  --tsviz-kind-color: var(--tsviz-kind-external);
+}
+
+/*
+ * Measuring pass: nodes are rendered so React Flow can size them, but not shown.
+ * Opacity on the viewport, because React Flow sets an inline `visibility` on
+ * each node once it is measured.
+ */
+.tsviz .flow--measuring .react-flow__viewport,
+.tsviz .flow--measuring .react-flow__minimap {
+  opacity: 0;
+}
+
+.tsviz .chip {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--tsviz-surface);
+  border: 1px solid var(--tsviz-border);
+  color: var(--tsviz-muted);
+}
+
+.tsviz .chip--error {
+  background: var(--tsviz-error-bg);
+  color: var(--tsviz-error-fg);
+}
+
+/* ---- Declaration cards ---- */
+
+.tsviz .card {
+  min-width: 140px;
+  max-width: 320px;
+  background: var(--tsviz-card-bg);
+  color: var(--tsviz-fg);
+  border: 1px solid var(--tsviz-border);
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 2px 8px rgb(0 0 0 / 0.05);
+}
+
+/* Room for the doc summary to wrap onto two lines. */
+.tsviz .card--doc {
+  min-width: 220px;
+}
+
+.tsviz .react-flow__node.selected .card {
+  outline: 2px solid var(--tsviz-kind-color);
+  outline-offset: 2px;
+}
+
+.tsviz .card--external {
+  border-style: dashed;
+  box-shadow: none;
+  opacity: 0.85;
+}
+
+.tsviz .card__head {
+  border-radius: 7px 7px 0 0;
+  background: color-mix(in srgb, var(--tsviz-kind-color) var(--tsviz-head-tint), var(--tsviz-card-bg));
+}
+
+.tsviz .card__head:last-child {
+  border-radius: 7px;
+}
+
+/* Externals are context, not declarations to inspect: no tint, outlined badge. */
+.tsviz .card--external .card__head {
+  background: none;
+}
+
+.tsviz .card--external .card__badge {
+  background: none;
+  color: var(--tsviz-kind-color);
+  box-shadow: inset 0 0 0 1px var(--tsviz-kind-color);
+}
+
+.tsviz .card__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.tsviz .card__badge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--tsviz-kind-color);
+  color: #fff;
+  font: 700 10px/14px var(--tsviz-font-mono);
+  text-align: center;
+}
+
+.tsviz .card__name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tsviz .card--local .card__name {
+  font-style: italic;
+}
+
+.tsviz .card__tparams {
+  color: var(--tsviz-muted);
+  font: 400 11px var(--tsviz-font-mono);
+}
+
+.tsviz .card__tag {
+  margin-left: auto;
+  background: var(--tsviz-card-bg);
+  padding: 0 4px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 3px;
+  color: var(--tsviz-muted);
+  font-size: 9px;
+  line-height: 14px;
+}
+
+.tsviz .card__heritage {
+  padding: 0 8px 6px;
+  color: var(--tsviz-muted);
+  font: 11px var(--tsviz-font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* First sentence of the doc comment, at most two lines. */
+.tsviz .card__doc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* Wraps to the width the other parts give the card, instead of widening it. */
+  contain: inline-size;
+  /* Space below is a margin: bottom padding would show the clamped third line. */
+  margin: 6px 8px 4px;
+  padding: 0;
+  color: var(--tsviz-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.tsviz .card__doc code {
+  color: var(--tsviz-fg);
+  font: 10.5px var(--tsviz-font-mono);
+}
+
+/* The summary sits directly above the body, with no rule between them. */
+.tsviz .card__doc + .card__body,
+.tsviz .card__doc + .card__chips {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.tsviz .card__body {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--tsviz-border);
+  font: 11px/16px var(--tsviz-font-mono);
+}
+
+.tsviz .card__line {
+  position: relative;
+  display: flex;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.tsviz .card__op {
+  flex: none;
+  width: 14px;
+  color: var(--tsviz-muted);
+}
+
+/* The type shrinks first; the name only once the type has no room left. */
+.tsviz .card__member {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tsviz .card__rest {
+  flex: 0 1000 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--tsviz-muted);
+}
+
+/* A type name that links to a related declaration, in that declaration's kind colour. */
+.tsviz .card__ref {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tsviz-kind-color);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tsviz .card__ref:hover,
+.tsviz .card__ref:focus-visible {
+  text-decoration-style: solid;
+}
+
+.tsviz .card__line--muted .card__member {
+  color: var(--tsviz-muted);
+}
+
+/* Numbers a function's overloads. */
+.tsviz .card__group-label {
+  padding: 0 8px;
+  color: var(--tsviz-muted);
+  font: 600 9px/14px var(--tsviz-font-mono);
+  letter-spacing: 0.05em;
+}
+
+/* Shrinks before the name does. */
+.tsviz .card__inline {
+  flex: 0 10 auto;
+  min-width: 0;
+  color: var(--tsviz-muted);
+  font: 11px var(--tsviz-font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tsviz .card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 6px 8px;
+  border-top: 1px solid var(--tsviz-border);
+}
+
+.tsviz .card__chip {
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--tsviz-kind-color) 30%, var(--tsviz-border));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tsviz-kind-color) 6%, var(--tsviz-card-bg));
+  font: 11px/16px var(--tsviz-font-mono);
+  white-space: nowrap;
+}
+
+.tsviz .card__more {
+  display: block;
+  margin: 0 8px 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tsviz-kind-color);
+  font: 11px var(--tsviz-font-mono);
+}
+
+.tsviz .card__more:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+/*
+ * Counts, then the location right-aligned. The card widens to fit the counts
+ * and `file:line`, never for the directory, which fills what space is left.
+ */
+.tsviz .card__footer {
+  display: flex;
+  gap: 8px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--tsviz-border);
+  border-radius: 0 0 7px 7px;
+  /* A step off the card in both themes (--surface equals --card-bg in dark). */
+  background: color-mix(in srgb, var(--tsviz-fg) 3%, var(--tsviz-card-bg));
+  color: var(--tsviz-muted);
+  font: 10px/14px var(--tsviz-font-mono);
+  white-space: nowrap;
+}
+
+.tsviz .card__counts,
+.tsviz .card__file {
+  flex: none;
+}
+
+.tsviz .card__location {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+/* Contained, so it adds nothing to the card's width; rtl, so it is cut from the start. */
+.tsviz .card__dir {
+  flex: 1 1 0;
+  min-width: 0;
+  contain: inline-size;
+  direction: rtl;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * ---- Hover and focus (see highlight.ts) ----
+ * Like the zoom levels, these never change a card's size.
+ */
+
+.tsviz .card {
+  transition:
+    opacity 0.15s,
+    filter 0.15s,
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+/* Hovered: lifted, with a border in the kind colour. */
+.tsviz .react-flow__node:hover .card {
+  border-color: color-mix(in srgb, var(--tsviz-kind-color) 45%, var(--tsviz-border));
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.08),
+    0 8px 24px rgb(0 0 0 / 0.14);
+}
+
+/* Not part of the focused cards' neighbourhood. */
+.tsviz .react-flow__node.is-faded .card {
+  opacity: 0.3;
+  filter: saturate(0.4);
+  box-shadow: none;
+}
+
+/* What a hovered row points to. */
+.tsviz .react-flow__node.is-target .card {
+  outline: 2px solid var(--tsviz-kind-color);
+  outline-offset: 2px;
+}
+
+/* The rows, heritage line or "+N more" a selected edge comes from. */
+.tsviz .card__line.is-lit,
+.tsviz .card__heritage.is-lit,
+.tsviz .card__more-row.is-lit {
+  background: color-mix(in srgb, var(--tsviz-kind-color) 18%, transparent);
+  box-shadow: inset 2px 0 0 var(--tsviz-kind-color);
+}
+
+/* Only at full detail: zoomed out, rows are bars and the whole card is the target. */
+.tsviz .card--full .card__line:hover {
+  background: color-mix(in srgb, var(--tsviz-kind-color) 12%, transparent);
+}
+
+.tsviz .react-flow__edge {
+  transition: opacity 0.15s;
+}
+
+/*
+ * React Flow paints a selected or focused edge in one gray, which hides its
+ * kind; keep each edge's own colour (selection shows as the highlight instead).
+ */
+.tsviz .react-flow__edge.rel {
+  --xy-edge-stroke-selected: var(--tsviz-rel-color);
+}
+
+.tsviz .react-flow__edge.is-faded {
+  opacity: 0.12;
+}
+
+/* Outranks the per-family widths further down. */
+.tsviz .react-flow .react-flow__edge.is-active .react-flow__edge-path {
+  stroke-width: 2.25;
+}
+
+/*
+ * ---- Zoomed out (see detail.ts) ----
+ * Nothing here may change a card's size: only transforms, colour and
+ * visibility, so the layout stays valid at every zoom level.
+ */
+
+/* Outline: a larger name, the rest of the text as bars of the same length. */
+.tsviz .card--outline .card__head {
+  overflow: hidden;
+}
+
+.tsviz .card--outline .card__header {
+  transform: scale(1.5);
+  transform-origin: 8px 50%;
+}
+
+.tsviz .card--outline .card__header > :not(.card__badge, .card__name),
+.tsviz .card--outline .card__tparams {
+  visibility: hidden;
+}
+
+.tsviz .card--outline .card__text,
+.tsviz .card--outline .card__line > *,
+.tsviz .card--outline .card__group-label,
+.tsviz .card--outline .card__chip,
+.tsviz .card--outline .card__more,
+.tsviz .card--outline .card__counts,
+.tsviz .card--outline .card__dir > span,
+.tsviz .card--outline .card__file {
+  color: transparent;
+  /* A bar about half the line's height, centred on it. */
+  background: linear-gradient(var(--tsviz-bar), var(--tsviz-bar)) 0 50% / 100% 55% no-repeat;
+  border-color: transparent;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Ellipses are drawn in the clipping box's colour, so those boxes go transparent too. */
+.tsviz .card--outline .card__text code,
+.tsviz .card--outline .card__doc,
+.tsviz .card--outline .card__heritage,
+.tsviz .card--outline .card__line,
+.tsviz .card--outline .card__dir {
+  color: transparent;
+}
+
+.tsviz .card--outline {
+  --tsviz-bar: color-mix(in srgb, var(--tsviz-fg) 14%, var(--tsviz-card-bg));
+}
+
+.tsviz .card--outline .card__heritage,
+.tsviz .card--outline .card__line--muted {
+  --tsviz-bar: color-mix(in srgb, var(--tsviz-fg) 9%, var(--tsviz-card-bg));
+}
+
+/* Overview: only the kind and the name, over the hidden card. */
+.tsviz .card--overview {
+  position: relative;
+  border-color: color-mix(in srgb, var(--tsviz-kind-color) 45%, var(--tsviz-border));
+  background: color-mix(in srgb, var(--tsviz-kind-color) calc(var(--tsviz-head-tint) + 6%), var(--tsviz-card-bg));
+}
+
+.tsviz .card--overview > :not(.card__overview, .react-flow__handle) {
+  visibility: hidden;
+}
+
+.tsviz .card__overview {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6%;
+  /* Units like cqh inside resolve against this box; on the box itself they would not. */
+  container-type: size;
+  overflow: hidden;
+}
+
+.tsviz .card__overview .card__badge {
+  margin-bottom: 6cqh;
+  min-width: 0;
+  padding: 0 0.3em;
+  border-radius: 0.2em;
+  font-size: min(18cqh, 14cqw);
+  line-height: 1.4;
+}
+
+/* As large as fits: about 0.55em per character across 90% of the width. */
+.tsviz .card__overview-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: min(28cqh, calc(160cqw / var(--tsviz-chars)));
+  line-height: 1.15;
+}
+
+/* Edge labels are unreadable below full detail; the edges' colours and dashes remain. */
+.tsviz .flow--outline .react-flow__edge-text,
+.tsviz .flow--outline .react-flow__edge-textbg,
+.tsviz .flow--overview .react-flow__edge-text,
+.tsviz .flow--overview .react-flow__edge-textbg {
+  display: none;
+}
+
+/* ---- Relationship popover (a selected edge) ---- */
+
+.tsviz .rel-popover {
+  position: absolute;
+  z-index: 10;
+  /* Just below and right of the point clicked. */
+  transform: translate(12px, 12px);
+  min-width: 260px;
+  max-width: 420px;
+  padding: 6px 0 4px;
+  background: var(--tsviz-card-bg);
+  color: var(--tsviz-fg);
+  border: 1px solid var(--tsviz-border);
+  border-radius: 8px;
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.08),
+    0 8px 24px rgb(0 0 0 / 0.16);
+  font-size: 12px;
+}
+
+.tsviz .rel-popover__ends {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 6px 10px;
+  border-bottom: 1px solid var(--tsviz-border);
+}
+
+.tsviz .rel-popover__end {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 6px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--tsviz-fg);
+  font:
+    600 12px system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  white-space: nowrap;
+}
+
+.tsviz .rel-popover__end:hover,
+.tsviz .rel-popover__end:focus-visible {
+  border-color: color-mix(in srgb, var(--tsviz-kind-color) 45%, var(--tsviz-border));
+  background: color-mix(in srgb, var(--tsviz-kind-color) var(--tsviz-head-tint), var(--tsviz-card-bg));
+}
+
+.tsviz .rel-popover__arrow {
+  color: var(--tsviz-muted);
+}
+
+.tsviz .rel-popover__close {
+  margin-left: auto;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--tsviz-muted);
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.tsviz .rel-popover__close:hover {
+  color: var(--tsviz-fg);
+}
+
+.tsviz .rel-popover__items {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0;
+}
+
+.tsviz .rel-popover__item {
+  display: grid;
+  grid-template-columns: 40px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+}
+
+.tsviz .rel-popover__kind {
+  color: var(--tsviz-muted);
+}
+
+.tsviz .rel-popover__via {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 11px var(--tsviz-font-mono);
+}
+
+.tsviz .rel-popover__location {
+  color: var(--tsviz-muted);
+  font: 10px var(--tsviz-font-mono);
+  white-space: nowrap;
+}
+
+/* Edges anchor to the handles, but nodes are not connectable: keep them invisible. */
+.tsviz .card .react-flow__handle {
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  opacity: 0;
+}
+
+/* A row that starts an edge: a dot on the card's edge, coloured like the edge. */
+.tsviz .card .react-flow__handle.card__port {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--tsviz-card-bg);
+  border-radius: 50%;
+  background: var(--tsviz-rel-color);
+  opacity: 1;
+  /* Hovering the row, not the dot, highlights its edges. */
+  pointer-events: none;
+}
+
+.tsviz .card__more-row {
+  position: relative;
+}
+
+/* ---- Relationships ---- */
+
+.tsviz .rel-family--inherit {
+  --xy-edge-stroke: var(--tsviz-rel-inherit);
+  --tsviz-rel-color: var(--tsviz-rel-inherit);
+}
+.tsviz .rel-family--structure {
+  --xy-edge-stroke: var(--tsviz-rel-structure);
+  --tsviz-rel-color: var(--tsviz-rel-structure);
+}
+.tsviz .rel-family--signature {
+  --xy-edge-stroke: var(--tsviz-rel-signature);
+  --tsviz-rel-color: var(--tsviz-rel-signature);
+}
+.tsviz .rel-family--composition {
+  --xy-edge-stroke: var(--tsviz-rel-composition);
+  --tsviz-rel-color: var(--tsviz-rel-composition);
+}
+.tsviz .rel-family--reference {
+  --xy-edge-stroke: var(--tsviz-rel-reference);
+  --tsviz-rel-color: var(--tsviz-rel-reference);
+}
+
+.tsviz .react-flow__edge-path {
+  stroke-width: 1.25;
+}
+
+.tsviz .react-flow__edge.rel-family--inherit .react-flow__edge-path {
+  stroke-width: 1.6;
+}
+
+/* Must match EDGE_LABEL_FONT in measureText.ts. */
+.tsviz .react-flow__edge-text {
+  /* The size must match EDGE_LABEL_SIZE in layout/measureText.ts. */
+  font: 10px var(--tsviz-font-sans);
+  fill: var(--tsviz-muted);
+}
+
+.tsviz .react-flow__edge-textbg {
+  fill: var(--tsviz-bg);
+}
+
+.tsviz .edge-markers {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.tsviz .marker path {
+  stroke: var(--tsviz-rel-color);
+  stroke-width: 1.25;
+}
+
+.tsviz .marker--triangle-hollow path {
+  /* Hollow, but opaque so the line does not show through. */
+  fill: var(--tsviz-bg);
+}
+
+.tsviz .marker--arrow path {
+  fill: var(--tsviz-rel-color);
+}
+
+.tsviz .marker--vee path {
+  fill: none;
+}
+
+/* ---- Filter bar (the legend, as a control) ---- */
+
+/*
+ * React Flow centres the panel with left: 50%, which would cap it at half the
+ * canvas; size it to its content instead, clear of the controls and minimap.
+ */
+.tsviz .react-flow__panel.filter-panel {
+  width: max-content;
+  max-width: max(320px, calc(100vw - 520px));
+}
+
+.tsviz .filter-bar {
+  /* Anchors the pop-ups. */
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 4px 6px;
+  background: var(--tsviz-surface);
+  border: 1px solid var(--tsviz-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  font-size: 12px;
+}
+
+.tsviz .filter-bar__group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.tsviz .filter-bar__divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 2px 2px;
+  background: var(--tsviz-border);
+}
+
+.tsviz .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--tsviz-fg);
+  font: 12px var(--tsviz-font-sans);
+}
+
+.tsviz .filter-chip:hover,
+.tsviz .filter-chip:focus-visible {
+  border-color: var(--tsviz-border);
+  background: var(--tsviz-bg);
+}
+
+/* Switched off: muted and struck through, so it reads as "faded" not "missing". */
+.tsviz .filter-chip[aria-pressed="false"] {
+  opacity: 0.45;
+}
+
+.tsviz .filter-chip[aria-pressed="false"] .card__badge,
+.tsviz .filter-chip[aria-pressed="false"] .swatch {
+  filter: grayscale(1);
+}
+
+.tsviz .filter-chip[aria-pressed="false"] .filter-chip__label,
+.tsviz .filter-chip[aria-pressed="false"] .filter-chip__count {
+  text-decoration: line-through;
+}
+
+.tsviz .filter-chip__count {
+  color: var(--tsviz-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tsviz .filter-chip__swatches {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.tsviz .filter-bar__dropped {
+  padding: 1px 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--tsviz-warn-bg);
+  color: var(--tsviz-warn-fg);
+  white-space: nowrap;
+  list-style: none;
+  cursor: pointer;
+}
+
+.tsviz .filter-bar__dropped::-webkit-details-marker {
+  display: none;
+}
+
+.tsviz .filter-bar__menu[open] .filter-bar__dropped,
+.tsviz .filter-bar__dropped:hover {
+  border-color: currentColor;
+}
+
+.tsviz .filter-bar__help summary {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 50%;
+  color: var(--tsviz-muted);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.tsviz .filter-bar__help summary::-webkit-details-marker {
+  display: none;
+}
+
+.tsviz .filter-bar__help[open] summary,
+.tsviz .filter-bar__help summary:hover {
+  color: var(--tsviz-fg);
+  border-color: var(--tsviz-muted);
+}
+
+/*
+ * Opens upwards from the bar, centred over the bar rather than its button (a
+ * button near the end of a wide bar would push it off the screen), and never
+ * wider than the screen.
+ */
+.tsviz .filter-popup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 10px);
+  box-sizing: border-box;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 12px;
+  background: var(--tsviz-card-bg);
+  border: 1px solid var(--tsviz-border);
+  border-radius: 8px;
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.08),
+    0 8px 24px rgb(0 0 0 / 0.16);
+  line-height: 1.4;
+}
+
+.tsviz .filter-help p {
+  margin: 0 0 8px;
+  color: var(--tsviz-muted);
+}
+
+.tsviz .filter-help p:last-child {
+  margin: 8px 0 0;
+}
+
+.tsviz .filter-help h3 {
+  margin: 8px 0 2px;
+  color: var(--tsviz-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tsviz .filter-help ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tsviz .filter-help li {
+  display: grid;
+  grid-template-columns: 44px 84px 1fr;
+  align-items: center;
+  gap: 4px;
+  line-height: 20px;
+}
+
+.tsviz .filter-help__meaning {
+  color: var(--tsviz-muted);
+}
+
+.tsviz .dropped-list {
+  /* Long lists scroll. */
+  width: 400px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.tsviz .dropped-list > p {
+  margin: 0 0 4px;
+  color: var(--tsviz-muted);
+}
+
+.tsviz .dropped-list h3 {
+  margin: 10px 0 0;
+  color: var(--tsviz-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tsviz .dropped-list__count {
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tsviz .dropped-list__hint {
+  margin: 2px 0 4px;
+  color: var(--tsviz-muted);
+  font-size: 11px;
+}
+
+.tsviz .dropped-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tsviz .dropped-list__item {
+  padding: 3px 0;
+}
+
+.tsviz .dropped-list__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.tsviz .dropped-list__name {
+  font: 11px var(--tsviz-font-mono);
+  color: var(--tsviz-fg);
+}
+
+.tsviz .dropped-list__times,
+.tsviz .dropped-list__more {
+  color: var(--tsviz-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tsviz .dropped-list__sites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  padding-left: 12px;
+  font-size: 11px;
+}
+
+.tsviz .dropped-list__site {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--tsviz-muted);
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tsviz .dropped-list__site:hover,
+.tsviz .dropped-list__site:focus-visible {
+  background: var(--tsviz-surface);
+  color: var(--tsviz-fg);
+}
+
+.tsviz .dropped-list__origin {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 4px;
+  color: var(--tsviz-muted);
+  font: 10px/14px var(--tsviz-font-mono);
+  white-space: nowrap;
+}
+
+/* Switched off in the filter bar: nearly gone, and not in the way of clicks. */
+.tsviz .react-flow__node.is-filtered {
+  pointer-events: none;
+}
+
+.tsviz .react-flow__node.is-filtered .card {
+  opacity: 0.1;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+.tsviz .react-flow__edge.is-filtered {
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.tsviz .react-flow__minimap-node.is-filtered {
+  opacity: 0.25;
+}
+
+.tsviz .swatch__line {
+  stroke: var(--tsviz-rel-color);
+  stroke-width: 1.5;
+  fill: none;
+}

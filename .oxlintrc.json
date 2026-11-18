@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "ignorePatterns": ["fixtures/**", "**/dist/**"],
+  "overrides": [
+    {
+      "files": ["packages/ui/src/**", "apps/web/src/**"],
+      "plugins": ["typescript", "unicorn", "oxc", "import", "react"],
+      "env": {
+        "browser": true,
+        "node": false
+      },
+      "rules": {
+        "react/react-in-jsx-scope": "off",
+        "import/no-unassigned-import": [
+          "warn",
+          {
+            "allow": ["**/*.css"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/ui/test/**", "apps/web/test/**"],
+      "rules": {
+        "vitest/valid-expect": [
+          "error",
+          {
+            "maxArgs": 2
+          }
+        ]
+      }
+    }
+  ]
+}

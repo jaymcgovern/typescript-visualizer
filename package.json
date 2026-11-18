@@ -1,0 +1,35 @@
+{
+  "name": "tsviz-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/graph",
+    "packages/parser",
+    "packages/mcp",
+    "packages/ui",
+    "apps/web"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "graph": "tsx --conditions=@tsviz/source packages/parser/src/cli.ts",
+    "mcp": "tsx --conditions=@tsviz/source packages/mcp/src/server.ts",
+    "web": "npm run dev -w apps/web",
+    "graph:self": "npm run graph -- \"packages/*/src/**/*.ts\" --root . -o apps/web/public/self.graph.json",
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm install --package-lock-only"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@types/node": "^26.6.6",
+    "oxfmt": "^0.78.0",
+    "oxlint": "^1.93.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
