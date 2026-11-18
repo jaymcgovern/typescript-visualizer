@@ -303,6 +303,16 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
     }),
     [getInternalNode, store, setCenter, getZoom],
   );
+  // A dropped reference's declaration may be filtered out (faded and unclickable): show its kind again first.
+  const goToDropped = useCallback(
+    (id: string) => {
+      const kind = graph.nodes.find((n) => n.id === id)?.kind;
+
+      if (kind) setFilters((f) => (f.kinds.has(kind) ? { ...f, kinds: toggle(f.kinds, kind) } : f));
+      actions.focus(id);
+    },
+    [graph, actions],
+  );
   const shownNodes = useMemo(() => withNodeHighlight(nodes, highlight, off.nodes), [nodes, highlight, off]);
   const shownEdges = useMemo(() => withEdgeHighlight(edges, highlight, off.edges), [edges, highlight, off]);
 
@@ -387,7 +397,7 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
               onToggleFamily={(family) => setFilters((f) => ({ ...f, families: toggle(f.families, family) }))}
               onHover={setFilterHover}
               {...(dropped ? { dropped } : {})}
-              onGoTo={actions.focus}
+              onGoTo={goToDropped}
             />
           </Panel>
           <Panel position="top-right">
