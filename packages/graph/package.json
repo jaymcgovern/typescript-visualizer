@@ -2,7 +2,7 @@
   "name": "@tsviz/graph",
   "version": "0.1.0",
   "description": "The TypeScript Visualizer graph format: types, validation and queries",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jaymcgovern/typescript-visualizer",
