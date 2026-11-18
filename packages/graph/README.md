@@ -8,7 +8,8 @@ dependencies and runs in browsers and Node.
   `NODE_KINDS`, `EDGE_KINDS` and `MEMBER_KINDS` lists.
 - **Validation:** `parseGraph(data, source)` checks untrusted JSON. It throws
   `GraphLoadError` on structural problems. Duplicate nodes and edges to missing
-  nodes are dropped and listed in `warnings`.
+  nodes are dropped, and missing or malformed `meta` fields get empty defaults;
+  each is listed in `warnings`.
 - **Queries:** build a `GraphIndex` once, then call `find`, `describe`,
   `neighbors`, `path` and `summary` on it.
 

@@ -54,4 +54,47 @@ describe("parseGraph", () => {
       "1 edge(s) referenced missing nodes and were skipped",
     ]);
   });
+
+  it("fills in a missing dropped and files with warnings", () => {
+    const { graph, warnings } = parseGraph({ ...minimal(), meta: { root: "." } }, "g.json");
+
+    expect(graph.meta).toEqual({
+      root: ".",
+      files: [],
+      includeExternal: false,
+      dropped: { external: 0, unresolved: 0, samples: [] },
+    });
+    expect(warnings).toEqual([
+      '"meta.dropped" is missing or malformed; no dropped references are reported',
+      '"meta.files" is missing or malformed; treated as []',
+      '"meta.includeExternal" is missing or malformed; treated as false',
+    ]);
+  });
+
+  it("skips malformed dropped entries with warnings", () => {
+    const data = minimal();
+    const meta = {
+      ...data.meta,
+      dropped: {
+        external: "2",
+        unresolved: 1,
+        samples: [{ from: "a.ts#A", name: "X", line: 1 }, { name: "Y" }],
+        names: [
+          { reason: "unresolved", name: "X", count: 1, sites: [{ from: "a.ts#A", line: 1 }] },
+          { reason: "typo", name: "Z", count: 1, sites: [] },
+        ],
+      },
+    };
+
+    const { graph, warnings } = parseGraph({ ...data, meta }, "g.json");
+
+    expect(graph.meta.dropped.external).toBe(0);
+    expect(graph.meta.dropped.samples).toHaveLength(1);
+    expect(graph.meta.dropped.names).toHaveLength(1);
+    expect(warnings).toEqual([
+      '"meta.dropped.external" is missing or malformed; treated as 0',
+      'Skipped 1 malformed "meta.dropped.samples" entries',
+      'Skipped 1 malformed "meta.dropped.names" entries',
+    ]);
+  });
 });
