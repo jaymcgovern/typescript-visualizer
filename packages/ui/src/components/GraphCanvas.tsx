@@ -387,6 +387,7 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
               onToggleFamily={(family) => setFilters((f) => ({ ...f, families: toggle(f.families, family) }))}
               onHover={setFilterHover}
               {...(dropped ? { dropped } : {})}
+              onGoTo={actions.focus}
             />
           </Panel>
           <Panel position="top-right">

@@ -4,9 +4,11 @@
  * Dependency-free and browser-safe.
  */
 export {
+  DROP_REASONS,
   EDGE_KINDS,
   MEMBER_KINDS,
   NODE_KINDS,
+  type DropReason,
   type DroppedReference,
   type EdgeKind,
   type Graph,

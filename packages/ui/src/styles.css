@@ -849,11 +849,7 @@
   border-radius: 6px;
   background: none;
   color: var(--tsviz-fg);
-  font:
-    12px system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
+  font: 12px var(--tsviz-font-sans);
 }
 
 .tsviz .filter-chip:hover,
@@ -887,17 +883,29 @@
   gap: 2px;
 }
 
+/* The pop-ups' anchors: "not drawn" and "?". */
+.tsviz .filter-bar__menu {
+  position: relative;
+}
+
 .tsviz .filter-bar__dropped {
-  padding: 2px 8px;
+  padding: 1px 7px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--tsviz-warn-bg);
   color: var(--tsviz-warn-fg);
   white-space: nowrap;
-  cursor: help;
+  list-style: none;
+  cursor: pointer;
 }
 
-.tsviz .filter-bar__help {
-  position: relative;
+.tsviz .filter-bar__dropped::-webkit-details-marker {
+  display: none;
+}
+
+.tsviz .filter-bar__menu[open] .filter-bar__dropped,
+.tsviz .filter-bar__dropped:hover {
+  border-color: currentColor;
 }
 
 .tsviz .filter-bar__help summary {
@@ -923,10 +931,11 @@
   border-color: var(--tsviz-muted);
 }
 
-/* Opens upwards from the bar. */
-.tsviz .filter-help {
+/* Opens upwards from the bar, centred over its button. */
+.tsviz .filter-popup {
   position: absolute;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: calc(100% + 10px);
   width: 360px;
   padding: 10px 12px;
@@ -973,6 +982,83 @@
 
 .tsviz .filter-help__meaning {
   color: var(--tsviz-muted);
+}
+
+.tsviz .dropped-list {
+  /* Long lists scroll. */
+  width: 400px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.tsviz .dropped-list > p {
+  margin: 0 0 4px;
+  color: var(--tsviz-muted);
+}
+
+.tsviz .dropped-list h3 {
+  margin: 10px 0 0;
+  color: var(--tsviz-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tsviz .dropped-list__count {
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tsviz .dropped-list__hint {
+  margin: 2px 0 4px;
+  color: var(--tsviz-muted);
+  font-size: 11px;
+}
+
+.tsviz .dropped-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tsviz .dropped-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  text-align: left;
+}
+
+.tsviz .dropped-list__item:hover,
+.tsviz .dropped-list__item:focus-visible {
+  background: var(--tsviz-surface);
+}
+
+.tsviz .dropped-list__name {
+  font: 11px var(--tsviz-font-mono);
+  color: var(--tsviz-fg);
+}
+
+.tsviz .dropped-list__from {
+  overflow: hidden;
+  color: var(--tsviz-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tsviz .dropped-list__origin {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 4px;
+  color: var(--tsviz-muted);
+  font: 10px/14px var(--tsviz-font-mono);
+  white-space: nowrap;
 }
 
 /* Switched off in the filter bar: nearly gone, and not in the way of clicks. */

@@ -1,4 +1,12 @@
-import { EDGE_KINDS, type EdgeKind, type GraphMeta, type NodeKind } from "@tsviz/graph";
+import {
+  DROP_REASONS,
+  EDGE_KINDS,
+  type DropReason,
+  type DroppedReference,
+  type EdgeKind,
+  type GraphMeta,
+  type NodeKind,
+} from "@tsviz/graph";
 import type { Highlight } from "./highlight.ts";
 import { REL_STYLES, type RelFamily } from "./relationships.ts";
 
@@ -97,25 +105,70 @@ export function countBy<T, K>(items: T[], key: (item: T) => K): Map<K, number> {
   return counts;
 }
 
+export interface DroppedItem {
+  /** Id of the declaration the reference appears in. */
+  from: string;
+  /** That declaration's qualified name. */
+  fromName: string;
+  /** The reference as written. */
+  name: string;
+  line: number;
+  /** For an external reference: `lib`, a package name, or a file. */
+  origin?: string;
+}
+
+export interface DroppedGroup {
+  reason: DropReason;
+  title: string;
+  /** What the reason means, and what to do about it. */
+  hint: string;
+  count: number;
+  /** Fewer than `count` when the graph predates `dropped.references` and kept only samples. */
+  items: DroppedItem[];
+}
+
+const GROUPS: Record<DropReason, { title: string; hint: string }> = {
+  external: {
+    title: "Outside the analysed files",
+    hint: "Extract with --include-external to draw these as placeholder declarations.",
+  },
+  unresolved: {
+    title: "Could not be resolved",
+    hint: "No declaration was found, e.g. a missing import or a call in an extends clause.",
+  },
+};
+
 /**
- * The references the graph has no edge for, as a short chip label and a
- * longer explanation; undefined when none were dropped.
+ * The references the graph has no edge for: a short chip label, and the
+ * references grouped by why they were dropped. Undefined when none were.
  */
-export function droppedSummary(meta: GraphMeta): { label: string; detail: string } | undefined {
-  const { external, unresolved, samples } = meta.dropped;
+export function droppedSummary(meta: GraphMeta): { label: string; groups: DroppedGroup[] } | undefined {
+  const { external, unresolved, samples, references } = meta.dropped;
   const total = external + unresolved;
 
   if (total === 0) return undefined;
 
-  const lines = [
-    "Some references have no line, so a missing line does not prove two declarations are unrelated.",
-    external > 0 ? `${external} point outside the analysed files (extract with --include-external to draw them).` : "",
-    unresolved > 0 ? `${unresolved} could not be resolved:` : "",
-    ...samples.map((s) => `  ${s.name}, from ${s.from.slice(s.from.indexOf("#") + 1)} (line ${s.line})`),
-  ];
+  const item = (r: DroppedReference): DroppedItem => ({
+    from: r.from,
+    fromName: r.from.slice(r.from.indexOf("#") + 1),
+    name: r.name,
+    line: r.line,
+    ...(r.origin !== undefined ? { origin: r.origin } : {}),
+  });
+  // Older graphs record only counts, plus samples of the unresolved ones.
+  const listed = (reason: DropReason) =>
+    references
+      ? references.filter((r) => r.reason === reason).map(item)
+      : reason === "unresolved"
+        ? samples.map(item)
+        : [];
+  const counts: Record<DropReason, number> = { external, unresolved };
+  const groups = DROP_REASONS.filter((reason) => counts[reason] > 0).map((reason) => ({
+    reason,
+    ...GROUPS[reason],
+    count: counts[reason],
+    items: listed(reason),
+  }));
 
-  return {
-    label: `${total} ${total === 1 ? "reference" : "references"} not drawn`,
-    detail: lines.filter(Boolean).join("\n"),
-  };
+  return { label: `${total} ${total === 1 ? "reference" : "references"} not drawn`, groups };
 }

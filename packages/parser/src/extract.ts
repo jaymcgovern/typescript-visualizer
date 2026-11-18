@@ -4,7 +4,7 @@ import { edgesFor, type Drop, type Resolver } from "./edges.ts";
 import { relativePath } from "./ids.ts";
 import type { Meaning } from "./members.ts";
 import { collectEntities } from "./nodes.ts";
-import type { Graph, GraphEdge, GraphNode } from "@tsviz/graph";
+import type { DropReason, DroppedReference, Graph, GraphEdge, GraphNode } from "@tsviz/graph";
 
 export interface ExtractOptions {
   /** Globs of files to analyze, relative to `root` (or absolute). Prefix with `!` to exclude. */
@@ -75,10 +75,12 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
     const decl = candidates[0];
 
     if (!target || !decl) return { dropped: "unresolved" };
-    if (!options.includeExternal) return { dropped: "external" };
+
+    const origin = originOf(decl.getSourceFile(), root);
+
+    if (!options.includeExternal) return { dropped: "external", origin };
 
     const name = target.getName();
-    const origin = originOf(decl.getSourceFile(), root);
     const id = `external:${origin}#${name}`;
 
     if (!externals.has(id)) {
@@ -94,11 +96,12 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
   };
 
   // Keyed like edges, so a reference seen twice (e.g. merged declarations) counts once.
-  const drops = new Map<string, Drop>();
+  const drops = new Map<string, Drop & { reason: DropReason }>();
   const onDrop = (drop: Drop) => {
-    if (drop.reason === "typeParam") return;
-    const key = JSON.stringify([drop.reason, drop.from, drop.name, drop.line]);
-    if (!drops.has(key)) drops.set(key, drop);
+    const { reason } = drop;
+    if (reason === "typeParam") return;
+    const key = JSON.stringify([reason, drop.from, drop.name, drop.line]);
+    if (!drops.has(key)) drops.set(key, { ...drop, reason });
   };
 
   const edgeByKey = new Map<string, GraphEdge>();
@@ -113,11 +116,18 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
     }
   }
 
-  const dropped = [...drops.values()];
-  const unresolved = dropped
-    .filter((d) => d.reason === "unresolved")
-    .map(({ from, name, line }) => ({ from, name, line }))
+  const references: DroppedReference[] = [...drops.values()]
+    .map(({ reason, from, name, line, origin }) => ({
+      from,
+      name,
+      line,
+      reason,
+      ...(origin !== undefined ? { origin } : {}),
+    }))
     .sort((a, b) => compare(a.from, b.from) || a.line - b.line || compare(a.name, b.name));
+  const unresolved = references
+    .filter((d) => d.reason === "unresolved")
+    .map(({ from, name, line }) => ({ from, name, line }));
 
   return {
     version: 1,
@@ -126,9 +136,10 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
       files: sources.map((sf) => relativePath(root, sf.getFilePath())).sort(compare),
       includeExternal: options.includeExternal ?? false,
       dropped: {
-        external: dropped.filter((d) => d.reason === "external").length,
+        external: references.length - unresolved.length,
         unresolved: unresolved.length,
         samples: unresolved.slice(0, MAX_DROP_SAMPLES),
+        references,
       },
     },
     nodes: [...entities.map((e) => e.node), ...externals.values()].sort((a, b) => compare(a.id, b.id)),

@@ -4,8 +4,8 @@ import type { EdgeKind, GraphEdge } from "@tsviz/graph";
 
 export type DropReason = "typeParam" | "external" | "unresolved";
 
-/** The declaration a reference denotes, or why it produces no edge. */
-export type Resolution = { id: string } | { dropped: DropReason };
+/** The declaration a reference denotes, or why it produces no edge (and, if external, where it lives). */
+export type Resolution = { id: string } | { dropped: DropReason; origin?: string };
 
 /** Maps a name/reference node to the id of the declaration it denotes. */
 export type Resolver = (ref: Node, meaning: Meaning) => Resolution;
@@ -15,6 +15,7 @@ export interface Drop {
   from: string;
   name: string;
   line: number;
+  origin?: string;
 }
 
 /** Resolves `ref` and records an edge, or reports the drop. */
@@ -37,6 +38,7 @@ export function edgesFor(
         from: sourceId,
         name: ref.getText(),
         line,
+        ...(resolution.origin !== undefined ? { origin: resolution.origin } : {}),
       });
 
       return;

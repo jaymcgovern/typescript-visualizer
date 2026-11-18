@@ -1,7 +1,8 @@
 import type { EdgeKind, NodeKind } from "@tsviz/graph";
 import { NODE_KINDS } from "@tsviz/graph";
 import { KIND_BADGE } from "../graph/declaration.ts";
-import { FAMILIES, type FilterHover, type Filters } from "../graph/filters.ts";
+import { useId } from "react";
+import { FAMILIES, type DroppedGroup, type FilterHover, type Filters } from "../graph/filters.ts";
 import { REL_STYLES, type RelFamily } from "../graph/relationships.ts";
 import { EdgeSwatch } from "./EdgeMarkers.tsx";
 
@@ -13,15 +14,29 @@ interface Props {
   onToggleKind: (kind: NodeKind) => void;
   onToggleFamily: (family: RelFamily) => void;
   onHover: (hover: FilterHover | undefined) => void;
-  dropped?: { label: string; detail: string };
+  dropped?: { label: string; groups: DroppedGroup[] };
+  /** Selects a declaration and pans to it. */
+  onGoTo: (id: string) => void;
 }
 
 /**
  * The legend as a control: one chip per declaration kind and relationship
  * family in the graph. Click a chip to fade those out of the way; hover (or
- * focus) it to highlight them. The `?` explains the line styles.
+ * focus) it to highlight them. The `?` explains the line styles, and the
+ * "not drawn" chip lists the references that have no line.
  */
-export function FilterBar({ nodeCounts, edgeCounts, filters, onToggleKind, onToggleFamily, onHover, dropped }: Props) {
+export function FilterBar({
+  nodeCounts,
+  edgeCounts,
+  filters,
+  onToggleKind,
+  onToggleFamily,
+  onHover,
+  dropped,
+  onGoTo,
+}: Props) {
+  // Opening one of the bar's pop-ups closes the other (per canvas, so several canvases don't interfere).
+  const popupGroup = useId();
   const families = FAMILIES.map((f) => ({ ...f, present: f.kinds.filter((k) => edgeCounts.has(k)) })).filter(
     (f) => f.present.length > 0,
   );
@@ -88,17 +103,50 @@ export function FilterBar({ nodeCounts, edgeCounts, filters, onToggleKind, onTog
       </div>
 
       {dropped && (
-        // Focusable so keyboard users can reach the explanation in its tooltip.
-        <span className="filter-bar__dropped" tabIndex={0} title={dropped.detail}>
-          {dropped.label}
-        </span>
+        <details className="filter-bar__menu" name={popupGroup}>
+          <summary className="filter-bar__dropped">{dropped.label}</summary>
+          <div className="filter-popup dropped-list nowheel">
+            <p>These references have no line, so a missing line does not prove two declarations are unrelated.</p>
+            {dropped.groups.map((group) => (
+              <section key={group.reason}>
+                <h3>
+                  {group.title} <span className="dropped-list__count">{group.count}</span>
+                </h3>
+                <p className="dropped-list__hint">{group.hint}</p>
+                <ul>
+                  {group.items.map((item, i) => (
+                    <li key={i}>
+                      <button
+                        type="button"
+                        className="dropped-list__item"
+                        title={`Go to ${item.from}`}
+                        onClick={() => onGoTo(item.from)}
+                      >
+                        <code className="dropped-list__name">{item.name}</code>
+                        <span className="dropped-list__from">
+                          in {item.fromName} · line {item.line}
+                        </span>
+                        {item.origin && <span className="dropped-list__origin">{item.origin}</span>}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {group.count > group.items.length && (
+                  <p className="dropped-list__hint">
+                    {group.count - group.items.length} more not listed: re-extract the graph to see them all.
+                  </p>
+                )}
+              </section>
+            ))}
+          </div>
+        </details>
       )}
 
-      <details className="filter-bar__help">
+      <details className="filter-bar__menu filter-bar__help" name={popupGroup}>
         <summary aria-label="How to read the graph" title="How to read the graph">
           ?
         </summary>
-        <div className="filter-help">
+        <div className="filter-popup filter-help">
           <p>Arrows point from a declaration to what it uses. Colour is the family; the dash tells kinds apart.</p>
           {families.map(({ family, label, present }) => (
             <div key={family} className="filter-help__family">

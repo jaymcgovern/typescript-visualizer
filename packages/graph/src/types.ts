@@ -73,12 +73,23 @@ export interface GraphEdge {
   line?: number;
 }
 
+export const DROP_REASONS = ["external", "unresolved"] as const;
+
+export type DropReason = (typeof DROP_REASONS)[number];
+
 export interface DroppedReference {
   /** Id of the node the reference appears in. */
   from: string;
   /** The reference as written. */
   name: string;
   line: number;
+  /** Why it has no edge. Set in `dropped.references`; `samples` are all unresolved. */
+  reason?: DropReason;
+  /**
+   * For an external reference, where its declaration lives: `lib` (TypeScript's
+   * built-in types), a package name, or a root-relative path.
+   */
+  origin?: string;
 }
 
 export interface GraphMeta {
@@ -98,6 +109,11 @@ export interface GraphMeta {
     unresolved: number;
     /** The first unresolved references, sorted. */
     samples: DroppedReference[];
+    /**
+     * Every dropped reference with its `reason`, sorted by `from` then line.
+     * Absent in graphs written before this field was added.
+     */
+    references?: DroppedReference[];
   };
 }
 

@@ -70,15 +70,48 @@ describe("droppedSummary", () => {
     expect(droppedSummary(meta({}))).toBeUndefined();
   });
 
-  it("counts and explains external and unresolved references", () => {
+  it("lists every dropped reference, grouped by reason", () => {
     const s = droppedSummary(
-      meta({ external: 41, unresolved: 1, samples: [{ from: "src/a.ts#Foo", name: "Missing", line: 3 }] }),
+      meta({
+        external: 2,
+        unresolved: 1,
+        references: [
+          { from: "src/a.ts#Foo", name: "Missing", line: 3, reason: "unresolved" },
+          { from: "src/a.ts#Foo", name: "Map", line: 4, reason: "external", origin: "lib" },
+          { from: "src/b.ts#NS.Bar", name: "Project", line: 9, reason: "external", origin: "ts-morph" },
+        ],
+      }),
     )!;
 
-    expect(s.label).toBe("42 references not drawn");
-    expect(s.detail).toContain("41 point outside the analysed files");
-    expect(s.detail).toContain("1 could not be resolved");
-    expect(s.detail).toContain("Missing, from Foo (line 3)");
+    expect(s.label).toBe("3 references not drawn");
+    expect(s.groups.map((g) => [g.reason, g.count, g.items.length])).toEqual([
+      ["external", 2, 2],
+      ["unresolved", 1, 1],
+    ]);
+    expect(s.groups[0]!.items[1]).toEqual({
+      from: "src/b.ts#NS.Bar",
+      fromName: "NS.Bar",
+      name: "Project",
+      line: 9,
+      origin: "ts-morph",
+    });
+    expect(s.groups[1]!.items).toEqual([{ from: "src/a.ts#Foo", fromName: "Foo", name: "Missing", line: 3 }]);
+  });
+
+  it("falls back to counts and samples for graphs without the full list", () => {
+    const s = droppedSummary(
+      meta({ external: 41, unresolved: 2, samples: [{ from: "src/a.ts#Foo", name: "Missing", line: 3 }] }),
+    )!;
+
+    expect(s.label).toBe("43 references not drawn");
+    expect(s.groups.map((g) => [g.reason, g.count, g.items.length])).toEqual([
+      ["external", 41, 0],
+      ["unresolved", 2, 1],
+    ]);
+  });
+
+  it("omits empty groups", () => {
+    expect(droppedSummary(meta({ unresolved: 1 }))!.groups.map((g) => g.reason)).toEqual(["unresolved"]);
   });
 
   it("uses the singular for one", () => {

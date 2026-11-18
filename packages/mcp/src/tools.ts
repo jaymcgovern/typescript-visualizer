@@ -52,7 +52,8 @@ export function createServer(load: () => Graph): McpServer {
         edgeCount: s.edgeCount,
         nodeKinds: s.nodeKinds,
         edgeKinds: s.edgeKinds,
-        dropped,
+        // Counts and the first unresolved samples; the full `references` list is too long for a summary.
+        dropped: { external: dropped.external, unresolved: dropped.unresolved, samples: dropped.samples },
       },
     };
   };
