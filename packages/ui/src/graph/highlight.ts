@@ -1,4 +1,4 @@
-import type { GraphEdge } from "@tsviz/graph";
+import { qualifiedName, type GraphEdge } from "@tsviz/graph";
 import type { BodyRow } from "./cardBody.ts";
 import type { Relationship } from "./relationships.ts";
 
@@ -125,7 +125,7 @@ export function rowMatches(row: BodyRow, edge: GraphEdge): boolean {
 
 /** `src/a.ts#NS.Foo@type` → `Foo`. */
 export function targetName(id: string): string {
-  const qualified = id.slice(id.indexOf("#") + 1).replace(/@\w+$/, "");
+  const qualified = qualifiedName(id);
 
   return qualified.slice(qualified.lastIndexOf(".") + 1);
 }

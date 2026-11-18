@@ -60,10 +60,11 @@ export class GraphIndex {
   }
 }
 
-/** The part of the id after `#`, without any `@kind` disambiguator. */
-export function qualifiedName(n: GraphNode): string {
-  const hash = n.id.indexOf("#");
-  const qualified = hash >= 0 ? n.id.slice(hash + 1) : n.id;
+/** The part of a node's id (or of an id) after `#`, without any `@kind` disambiguator. */
+export function qualifiedName(n: GraphNode | string): string {
+  const id = typeof n === "string" ? n : n.id;
+  const hash = id.indexOf("#");
+  const qualified = hash >= 0 ? id.slice(hash + 1) : id;
 
   return qualified.replace(/@[a-z]+$/, "");
 }
