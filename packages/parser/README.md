@@ -31,6 +31,7 @@ const graph = extractGraph({ files: ["src/**/*.ts"], root: process.cwd() });
 - **nodes:** id (`<file>#<qualified name>`), kind, location (`line`–`endLine`), `signature`, `doc` and members.
 - **edges:** `source --kind:label--> target`, plus the `line` of the reference.
 - **meta:** what was analyzed, and the references that produced no edge
-  (`dropped`): counts, plus every one in `dropped.references` with its reason
-  and, for external ones, where it resolved (`lib`, a package, or a file). When
-  any were dropped, a missing edge does not prove two declarations are unrelated.
+  (`dropped`): counts, plus all of them in `dropped.names`, grouped by reason,
+  name and, for external ones, where it resolved (`lib`, a package, or a file),
+  each with a count and its first few sites. When any were dropped, a missing
+  edge does not prove two declarations are unrelated.

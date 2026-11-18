@@ -83,13 +83,32 @@ export interface DroppedReference {
   /** The reference as written. */
   name: string;
   line: number;
-  /** Why it has no edge. Set in `dropped.references`; `samples` are all unresolved. */
-  reason?: DropReason;
+}
+
+/** Where a dropped reference appears. */
+export interface DroppedSite {
+  /** Id of the node the reference appears in. */
+  from: string;
+  line: number;
+}
+
+/** How many sites `DroppedName.sites` keeps. */
+export const MAX_DROP_SITES = 3;
+
+/** Every dropped reference to one name, for one reason and origin. */
+export interface DroppedName {
+  reason: DropReason;
+  /** The reference as written. */
+  name: string;
   /**
    * For an external reference, where its declaration lives: `lib` (TypeScript's
    * built-in types), a package name, or a root-relative path.
    */
   origin?: string;
+  /** How many times it appears. */
+  count: number;
+  /** The first `MAX_DROP_SITES` places it appears, sorted by `from` then line. */
+  sites: DroppedSite[];
 }
 
 export interface GraphMeta {
@@ -110,10 +129,10 @@ export interface GraphMeta {
     /** The first unresolved references, sorted. */
     samples: DroppedReference[];
     /**
-     * Every dropped reference with its `reason`, sorted by `from` then line.
-     * Absent in graphs written before this field was added.
+     * Every dropped reference, grouped by reason, name and origin (see
+     * `groupDropped`). Absent in graphs written before this field was added.
      */
-    references?: DroppedReference[];
+    names?: DroppedName[];
   };
 }
 

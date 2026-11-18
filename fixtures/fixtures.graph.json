@@ -43,60 +43,84 @@
           "line": 14
         }
       ],
-      "references": [
+      "names": [
         {
-          "from": "fixtures/agent/unresolved.ts#Broken",
-          "name": "Missing",
-          "line": 2,
-          "reason": "unresolved"
-        },
-        {
-          "from": "fixtures/basic/types.ts#Registry",
+          "reason": "external",
           "name": "Map",
-          "line": 21,
-          "reason": "external",
-          "origin": "lib"
+          "origin": "lib",
+          "count": 2,
+          "sites": [
+            {
+              "from": "fixtures/basic/types.ts#Registry",
+              "line": 21
+            },
+            {
+              "from": "fixtures/edge-cases/externals.ts#UsesExternal",
+              "line": 8
+            }
+          ]
         },
         {
-          "from": "fixtures/dmp/playback-session.ts#PlaybackSession",
+          "reason": "external",
           "name": "Promise",
-          "line": 7,
+          "origin": "lib",
+          "count": 2,
+          "sites": [
+            {
+              "from": "fixtures/dmp/playback-session.ts#PlaybackSession",
+              "line": 7
+            },
+            {
+              "from": "fixtures/dmp/playback-session.ts#PlaybackSession",
+              "line": 8
+            }
+          ]
+        },
+        {
           "reason": "external",
-          "origin": "lib"
-        },
-        {
-          "from": "fixtures/dmp/playback-session.ts#PlaybackSession",
-          "name": "Promise",
-          "line": 8,
-          "reason": "external",
-          "origin": "lib"
-        },
-        {
-          "from": "fixtures/edge-cases/externals.ts#Mixed",
-          "name": "mixin(Object)",
-          "line": 14,
-          "reason": "unresolved"
-        },
-        {
-          "from": "fixtures/edge-cases/externals.ts#UsesExternal",
           "name": "P",
-          "line": 6,
-          "reason": "external",
-          "origin": "ts-morph"
+          "origin": "ts-morph",
+          "count": 1,
+          "sites": [
+            {
+              "from": "fixtures/edge-cases/externals.ts#UsesExternal",
+              "line": 6
+            }
+          ]
         },
         {
-          "from": "fixtures/edge-cases/externals.ts#UsesExternal",
+          "reason": "external",
           "name": "Project",
-          "line": 7,
-          "reason": "external",
-          "origin": "ts-morph"
+          "origin": "ts-morph",
+          "count": 1,
+          "sites": [
+            {
+              "from": "fixtures/edge-cases/externals.ts#UsesExternal",
+              "line": 7
+            }
+          ]
         },
         {
-          "from": "fixtures/edge-cases/externals.ts#UsesExternal",
-          "name": "Map",
-          "line": 8,
-          "reason": "external",
-          "origin": "lib"
+          "reason": "unresolved",
+          "name": "Missing",
+          "count": 1,
+          "sites": [
+            {
+              "from": "fixtures/agent/unresolved.ts#Broken",
+              "line": 2
+            }
+          ]
+        },
+        {
+          "reason": "unresolved",
+          "name": "mixin(Object)",
+          "count": 1,
+          "sites": [
+            {
+              "from": "fixtures/edge-cases/externals.ts#Mixed",
+              "line": 14
+            }
+          ]
         }
       ]
     }

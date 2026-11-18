@@ -1,8 +1,10 @@
 import {
   DROP_REASONS,
   EDGE_KINDS,
+  groupDropped,
+  qualifiedName,
   type DropReason,
-  type DroppedReference,
+  type DroppedName,
   type EdgeKind,
   type GraphMeta,
   type NodeKind,
@@ -105,16 +107,23 @@ export function countBy<T, K>(items: T[], key: (item: T) => K): Map<K, number> {
   return counts;
 }
 
-export interface DroppedItem {
+export interface DroppedSiteItem {
   /** Id of the declaration the reference appears in. */
   from: string;
   /** That declaration's qualified name. */
   fromName: string;
+  line: number;
+}
+
+/** Every dropped reference to one name. */
+export interface DroppedItem {
   /** The reference as written. */
   name: string;
-  line: number;
   /** For an external reference: `lib`, a package name, or a file. */
   origin?: string;
+  count: number;
+  /** The first few places it appears; fewer than `count` when it appears often. */
+  sites: DroppedSiteItem[];
 }
 
 export interface DroppedGroup {
@@ -123,7 +132,7 @@ export interface DroppedGroup {
   /** What the reason means, and what to do about it. */
   hint: string;
   count: number;
-  /** Fewer than `count` when the graph predates `dropped.references` and kept only samples. */
+  /** Their counts add up to fewer than `count` when the graph predates `dropped.names` and kept only samples. */
   items: DroppedItem[];
 }
 
@@ -140,35 +149,44 @@ const GROUPS: Record<DropReason, { title: string; hint: string }> = {
 
 /**
  * The references the graph has no edge for: a short chip label, and the
- * references grouped by why they were dropped. Undefined when none were.
+ * references grouped by why they were dropped, then by name. Undefined when
+ * none were.
  */
 export function droppedSummary(meta: GraphMeta): { label: string; groups: DroppedGroup[] } | undefined {
-  const { external, unresolved, samples, references } = meta.dropped;
-  const total = external + unresolved;
+  const { external, unresolved, samples, names } = meta.dropped;
+  const byReason = new Map<DropReason, DroppedItem[]>();
+  // Older graphs record only counts, plus samples of the unresolved ones.
+  const listed = names ?? groupDropped(samples.map((r) => ({ ...r, reason: "unresolved" })));
+
+  for (const n of listed) {
+    const items = byReason.get(n.reason) ?? [];
+
+    items.push(toItem(n));
+    byReason.set(n.reason, items);
+  }
+
+  const counts: Record<DropReason, number> = { external, unresolved };
+  // With the full list, count what it holds, so a stale count can't claim entries are missing.
+  const countOf = (reason: DropReason) =>
+    names ? (byReason.get(reason) ?? []).reduce((sum, i) => sum + i.count, 0) : counts[reason];
+  const groups = DROP_REASONS.map((reason) => ({
+    reason,
+    ...GROUPS[reason],
+    count: countOf(reason),
+    items: byReason.get(reason) ?? [],
+  })).filter((g) => g.count > 0);
+  const total = groups.reduce((sum, g) => sum + g.count, 0);
 
   if (total === 0) return undefined;
 
-  const item = (r: DroppedReference): DroppedItem => ({
-    from: r.from,
-    fromName: r.from.slice(r.from.indexOf("#") + 1),
-    name: r.name,
-    line: r.line,
-    ...(r.origin !== undefined ? { origin: r.origin } : {}),
-  });
-  // Older graphs record only counts, plus samples of the unresolved ones.
-  const listed = (reason: DropReason) =>
-    references
-      ? references.filter((r) => r.reason === reason).map(item)
-      : reason === "unresolved"
-        ? samples.map(item)
-        : [];
-  const counts: Record<DropReason, number> = { external, unresolved };
-  const groups = DROP_REASONS.filter((reason) => counts[reason] > 0).map((reason) => ({
-    reason,
-    ...GROUPS[reason],
-    count: counts[reason],
-    items: listed(reason),
-  }));
-
   return { label: `${total} ${total === 1 ? "reference" : "references"} not drawn`, groups };
+}
+
+function toItem({ name, origin, count, sites }: DroppedName): DroppedItem {
+  return {
+    name,
+    ...(origin !== undefined ? { origin } : {}),
+    count,
+    sites: sites.map(({ from, line }) => ({ from, fromName: qualifiedName(from), line })),
+  };
 }

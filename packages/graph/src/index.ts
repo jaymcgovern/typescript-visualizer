@@ -6,10 +6,13 @@
 export {
   DROP_REASONS,
   EDGE_KINDS,
+  MAX_DROP_SITES,
   MEMBER_KINDS,
   NODE_KINDS,
   type DropReason,
+  type DroppedName,
   type DroppedReference,
+  type DroppedSite,
   type EdgeKind,
   type Graph,
   type GraphEdge,
@@ -18,6 +21,7 @@ export {
   type Member,
   type NodeKind,
 } from "./types.ts";
+export { groupDropped, type ReasonedReference } from "./dropped.ts";
 export { GraphIndex, qualifiedName, type RefResolution } from "./graph-index.ts";
 export {
   describe,

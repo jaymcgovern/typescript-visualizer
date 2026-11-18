@@ -4,7 +4,7 @@ import { edgesFor, type Drop, type Resolver } from "./edges.ts";
 import { relativePath } from "./ids.ts";
 import type { Meaning } from "./members.ts";
 import { collectEntities } from "./nodes.ts";
-import type { DropReason, DroppedReference, Graph, GraphEdge, GraphNode } from "@tsviz/graph";
+import { groupDropped, type Graph, type GraphEdge, type GraphNode, type ReasonedReference } from "@tsviz/graph";
 
 export interface ExtractOptions {
   /** Globs of files to analyze, relative to `root` (or absolute). Prefix with `!` to exclude. */
@@ -96,7 +96,7 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
   };
 
   // Keyed like edges, so a reference seen twice (e.g. merged declarations) counts once.
-  const drops = new Map<string, Drop & { reason: DropReason }>();
+  const drops = new Map<string, ReasonedReference>();
   const onDrop = (drop: Drop) => {
     const { reason } = drop;
     if (reason === "typeParam") return;
@@ -116,18 +116,10 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
     }
   }
 
-  const references: DroppedReference[] = [...drops.values()]
-    .map(({ reason, from, name, line, origin }) => ({
-      from,
-      name,
-      line,
-      reason,
-      ...(origin !== undefined ? { origin } : {}),
-    }))
-    .sort((a, b) => compare(a.from, b.from) || a.line - b.line || compare(a.name, b.name));
-  const unresolved = references
+  const unresolved = [...drops.values()]
     .filter((d) => d.reason === "unresolved")
-    .map(({ from, name, line }) => ({ from, name, line }));
+    .map(({ from, name, line }) => ({ from, name, line }))
+    .sort((a, b) => compare(a.from, b.from) || a.line - b.line || compare(a.name, b.name));
 
   return {
     version: 1,
@@ -136,10 +128,10 @@ export function extractGraph(options: ExtractOptions = {}): Graph {
       files: sources.map((sf) => relativePath(root, sf.getFilePath())).sort(compare),
       includeExternal: options.includeExternal ?? false,
       dropped: {
-        external: references.length - unresolved.length,
+        external: drops.size - unresolved.length,
         unresolved: unresolved.length,
         samples: unresolved.slice(0, MAX_DROP_SAMPLES),
-        references,
+        names: groupDropped(drops.values()),
       },
     },
     nodes: [...entities.map((e) => e.node), ...externals.values()].sort((a, b) => compare(a.id, b.id)),

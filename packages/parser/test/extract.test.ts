@@ -330,27 +330,40 @@ describe("agent metadata", () => {
         external: 0,
         unresolved: 1,
         samples: [{ from: "fixtures/agent/unresolved.ts#Broken", name: "Missing", line: 2 }],
-        references: [{ from: "fixtures/agent/unresolved.ts#Broken", name: "Missing", line: 2, reason: "unresolved" }],
+        names: [
+          {
+            reason: "unresolved",
+            name: "Missing",
+            count: 1,
+            sites: [{ from: "fixtures/agent/unresolved.ts#Broken", line: 2 }],
+          },
+        ],
       },
     });
   });
 
-  it("lists every dropped reference, with where external ones live", () => {
+  it("lists every dropped reference by name, with where external ones live", () => {
     const { dropped } = extract("edge-cases").meta;
     const X = "fixtures/edge-cases/externals.ts";
 
-    expect(dropped.references).toEqual(
+    expect(dropped.names).toEqual(
       expect.arrayContaining([
-        { from: `${X}#UsesExternal`, name: "Project", line: 7, reason: "external", origin: "ts-morph" },
-        { from: `${X}#UsesExternal`, name: "Map", line: 8, reason: "external", origin: "lib" },
-        { from: `${X}#Mixed`, name: "mixin(Object)", line: 14, reason: "unresolved" },
+        {
+          reason: "external",
+          name: "Project",
+          origin: "ts-morph",
+          count: 1,
+          sites: [{ from: `${X}#UsesExternal`, line: 7 }],
+        },
+        { reason: "external", name: "Map", origin: "lib", count: 1, sites: [{ from: `${X}#UsesExternal`, line: 8 }] },
+        { reason: "unresolved", name: "mixin(Object)", count: 1, sites: [{ from: `${X}#Mixed`, line: 14 }] },
       ]),
     );
-    expect(dropped.references).toHaveLength(dropped.external + dropped.unresolved);
+    expect(dropped.names!.reduce((sum, n) => sum + n.count, 0)).toBe(dropped.external + dropped.unresolved);
   });
 
   it("lists no external references when they are drawn", () => {
-    expect(extract("edge-cases", true).meta.dropped.references!.filter((r) => r.reason === "external")).toEqual([]);
+    expect(extract("edge-cases", true).meta.dropped.names!.filter((n) => n.reason === "external")).toEqual([]);
   });
 
   it("counts omitted external references only when they are omitted", () => {

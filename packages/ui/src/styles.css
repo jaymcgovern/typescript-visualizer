@@ -1023,20 +1023,14 @@
 }
 
 .tsviz .dropped-list__item {
+  padding: 3px 0;
+}
+
+.tsviz .dropped-list__head {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  width: 100%;
-  padding: 2px 4px;
-  border: 0;
-  border-radius: 4px;
-  background: none;
-  text-align: left;
-}
-
-.tsviz .dropped-list__item:hover,
-.tsviz .dropped-list__item:focus-visible {
-  background: var(--tsviz-surface);
+  padding: 0 4px;
 }
 
 .tsviz .dropped-list__name {
@@ -1044,11 +1038,41 @@
   color: var(--tsviz-fg);
 }
 
-.tsviz .dropped-list__from {
-  overflow: hidden;
+.tsviz .dropped-list__times,
+.tsviz .dropped-list__more {
   color: var(--tsviz-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tsviz .dropped-list__sites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  padding-left: 12px;
+  font-size: 11px;
+}
+
+.tsviz .dropped-list__site {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--tsviz-muted);
+  font: inherit;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.tsviz .dropped-list__site:hover,
+.tsviz .dropped-list__site:focus-visible {
+  background: var(--tsviz-surface);
+  color: var(--tsviz-fg);
 }
 
 .tsviz .dropped-list__origin {

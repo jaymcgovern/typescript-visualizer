@@ -1,7 +1,7 @@
 import type { EdgeKind, NodeKind } from "@tsviz/graph";
 import { NODE_KINDS } from "@tsviz/graph";
 import { KIND_BADGE } from "../graph/declaration.ts";
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 import { FAMILIES, type DroppedGroup, type FilterHover, type Filters } from "../graph/filters.ts";
 import { REL_STYLES, type RelFamily } from "../graph/relationships.ts";
 import { EdgeSwatch } from "./EdgeMarkers.tsx";
@@ -15,7 +15,7 @@ interface Props {
   onToggleFamily: (family: RelFamily) => void;
   onHover: (hover: FilterHover | undefined) => void;
   dropped?: { label: string; groups: DroppedGroup[] };
-  /** Selects a declaration and pans to it. */
+  /** Shows a declaration a dropped reference appears in: selects it and pans to it. */
   onGoTo: (id: string) => void;
 }
 
@@ -37,6 +37,9 @@ export function FilterBar({
 }: Props) {
   // Opening one of the bar's pop-ups closes the other (per canvas, so several canvases don't interfere).
   const popupGroup = useId();
+  // The dropped list can be long, so it is only rendered while open.
+  const droppedMenu = useRef<HTMLDetailsElement>(null);
+  const [droppedOpen, setDroppedOpen] = useState(false);
   const families = FAMILIES.map((f) => ({ ...f, present: f.kinds.filter((k) => edgeCounts.has(k)) })).filter(
     (f) => f.present.length > 0,
   );
@@ -103,42 +106,65 @@ export function FilterBar({
       </div>
 
       {dropped && (
-        <details className="filter-bar__menu" name={popupGroup}>
+        <details
+          ref={droppedMenu}
+          className="filter-bar__menu"
+          name={popupGroup}
+          onToggle={(e) => setDroppedOpen(e.currentTarget.open)}
+        >
           <summary className="filter-bar__dropped">{dropped.label}</summary>
-          <div className="filter-popup dropped-list nowheel">
-            <p>These references have no line, so a missing line does not prove two declarations are unrelated.</p>
-            {dropped.groups.map((group) => (
-              <section key={group.reason}>
-                <h3>
-                  {group.title} <span className="dropped-list__count">{group.count}</span>
-                </h3>
-                <p className="dropped-list__hint">{group.hint}</p>
-                <ul>
-                  {group.items.map((item, i) => (
-                    <li key={i}>
-                      <button
-                        type="button"
-                        className="dropped-list__item"
-                        title={`Go to ${item.from}`}
-                        onClick={() => onGoTo(item.from)}
-                      >
-                        <code className="dropped-list__name">{item.name}</code>
-                        <span className="dropped-list__from">
-                          in {item.fromName} · line {item.line}
-                        </span>
-                        {item.origin && <span className="dropped-list__origin">{item.origin}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                {group.count > group.items.length && (
-                  <p className="dropped-list__hint">
-                    {group.count - group.items.length} more not listed: re-extract the graph to see them all.
-                  </p>
-                )}
-              </section>
-            ))}
-          </div>
+          {droppedOpen && (
+            <div className="filter-popup dropped-list nowheel">
+              <p>These references have no line, so a missing line does not prove two declarations are unrelated.</p>
+              {dropped.groups.map((group) => {
+                const listed = group.items.reduce((sum, item) => sum + item.count, 0);
+
+                return (
+                  <section key={group.reason}>
+                    <h3>
+                      {group.title} <span className="dropped-list__count">{group.count}</span>
+                    </h3>
+                    <p className="dropped-list__hint">{group.hint}</p>
+                    <ul>
+                      {group.items.map((item) => (
+                        <li key={`${item.name}\n${item.origin ?? ""}`} className="dropped-list__item">
+                          <div className="dropped-list__head">
+                            <code className="dropped-list__name">{item.name}</code>
+                            {item.count > 1 && <span className="dropped-list__times">×{item.count}</span>}
+                            {item.origin && <span className="dropped-list__origin">{item.origin}</span>}
+                          </div>
+                          <div className="dropped-list__sites">
+                            {item.sites.map((site) => (
+                              <button
+                                key={`${site.from}:${site.line}`}
+                                type="button"
+                                className="dropped-list__site"
+                                title={`Go to ${site.from}`}
+                                onClick={() => {
+                                  if (droppedMenu.current) droppedMenu.current.open = false;
+                                  onGoTo(site.from);
+                                }}
+                              >
+                                in {site.fromName} · line {site.line}
+                              </button>
+                            ))}
+                            {item.count > item.sites.length && (
+                              <span className="dropped-list__more">and {item.count - item.sites.length} more</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    {group.count > listed && (
+                      <p className="dropped-list__hint">
+                        {group.count - listed} more not listed: re-extract the graph to see them all.
+                      </p>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
         </details>
       )}
 

@@ -70,32 +70,53 @@ describe("droppedSummary", () => {
     expect(droppedSummary(meta({}))).toBeUndefined();
   });
 
-  it("lists every dropped reference, grouped by reason", () => {
+  it("lists every dropped name, grouped by reason", () => {
     const s = droppedSummary(
       meta({
-        external: 2,
+        external: 3,
         unresolved: 1,
-        references: [
-          { from: "src/a.ts#Foo", name: "Missing", line: 3, reason: "unresolved" },
-          { from: "src/a.ts#Foo", name: "Map", line: 4, reason: "external", origin: "lib" },
-          { from: "src/b.ts#NS.Bar", name: "Project", line: 9, reason: "external", origin: "ts-morph" },
+        names: [
+          { reason: "external", name: "Map", origin: "lib", count: 2, sites: [{ from: "src/a.ts#Foo", line: 4 }] },
+          {
+            reason: "external",
+            name: "Project",
+            origin: "ts-morph",
+            count: 1,
+            sites: [{ from: "src/b.ts#NS.Bar", line: 9 }],
+          },
+          { reason: "unresolved", name: "Missing", count: 1, sites: [{ from: "src/a.ts#Foo@function", line: 3 }] },
         ],
       }),
     )!;
 
-    expect(s.label).toBe("3 references not drawn");
+    expect(s.label).toBe("4 references not drawn");
     expect(s.groups.map((g) => [g.reason, g.count, g.items.length])).toEqual([
-      ["external", 2, 2],
+      ["external", 3, 2],
       ["unresolved", 1, 1],
     ]);
     expect(s.groups[0]!.items[1]).toEqual({
-      from: "src/b.ts#NS.Bar",
-      fromName: "NS.Bar",
       name: "Project",
-      line: 9,
       origin: "ts-morph",
+      count: 1,
+      sites: [{ from: "src/b.ts#NS.Bar", fromName: "NS.Bar", line: 9 }],
     });
-    expect(s.groups[1]!.items).toEqual([{ from: "src/a.ts#Foo", fromName: "Foo", name: "Missing", line: 3 }]);
+    // The `@kind` disambiguator is part of the id, not the name.
+    expect(s.groups[1]!.items).toEqual([
+      { name: "Missing", count: 1, sites: [{ from: "src/a.ts#Foo@function", fromName: "Foo", line: 3 }] },
+    ]);
+  });
+
+  it("counts what the list holds rather than trusting stale counts", () => {
+    const s = droppedSummary(
+      meta({
+        external: 9,
+        unresolved: 0,
+        names: [{ reason: "external", name: "Map", origin: "lib", count: 2, sites: [{ from: "a.ts#F", line: 1 }] }],
+      }),
+    )!;
+
+    expect(s.label).toBe("2 references not drawn");
+    expect(s.groups.map((g) => [g.reason, g.count])).toEqual([["external", 2]]);
   });
 
   it("falls back to counts and samples for graphs without the full list", () => {
