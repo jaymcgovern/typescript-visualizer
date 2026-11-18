@@ -1,8 +1,9 @@
 import { Node } from "ts-morph";
 import { paramRoots, returnRoot, walkMembers, type Meaning, type Root } from "./members.ts";
-import type { EdgeKind, GraphEdge } from "@tsviz/graph";
+import type { DropReason as GraphDropReason, EdgeKind, GraphEdge } from "@tsviz/graph";
 
-export type DropReason = "typeParam" | "external" | "unresolved";
+/** Why a reference has no edge. `typeParam` drops are expected and never reported. */
+export type DropReason = GraphDropReason | "typeParam";
 
 /** The declaration a reference denotes, or why it produces no edge (and, if external, where it lives). */
 export type Resolution = { id: string } | { dropped: DropReason; origin?: string };
