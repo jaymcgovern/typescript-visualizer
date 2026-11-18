@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "React components for visualizing a TypeScript declaration graph",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaymcgovern/typescript-visualizer",
+    "directory": "packages/ui"
+  },
   "files": [
     "dist"
   ],

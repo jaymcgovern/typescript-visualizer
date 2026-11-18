@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "The TypeScript Visualizer graph format: types, validation and queries",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaymcgovern/typescript-visualizer",
+    "directory": "packages/graph"
+  },
   "files": [
     "dist"
   ],
