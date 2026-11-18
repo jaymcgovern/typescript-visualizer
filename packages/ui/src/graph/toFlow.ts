@@ -42,25 +42,34 @@ export function toFlow(graph: Graph): { nodes: DeclNode[]; edges: DeclEdge[] } {
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
   const outgoing = new Map<string, Relationship[]>();
 
-  for (const rel of relationships) outgoing.set(rel.source, [...(outgoing.get(rel.source) ?? []), rel]);
+  for (const rel of relationships) {
+    const list = outgoing.get(rel.source);
 
-  const nodes: DeclNode[] = sorted.map((decl, i) => ({
-    id: decl.id,
-    type: "decl",
-    position: { x: (i % columns) * GRID.cellWidth, y: Math.floor(i / columns) * GRID.cellHeight },
-    data: {
-      decl,
-      degree: degrees.get(decl.id) ?? { in: 0, out: 0 },
-      out: outgoing.get(decl.id) ?? [],
-      refs: (outgoing.get(decl.id) ?? []).flatMap((rel) => {
-        const target = byId.get(rel.target);
+    if (list) list.push(rel);
+    else outgoing.set(rel.source, [rel]);
+  }
 
-        return target ? [{ id: target.id, name: target.name, kind: target.kind }] : [];
-      }),
-    },
-    className: `decl decl--${decl.kind}`,
-    ...handlePositions("DOWN"),
-  }));
+  const nodes: DeclNode[] = sorted.map((decl, i) => {
+    const out = outgoing.get(decl.id) ?? [];
+
+    return {
+      id: decl.id,
+      type: "decl",
+      position: { x: (i % columns) * GRID.cellWidth, y: Math.floor(i / columns) * GRID.cellHeight },
+      data: {
+        decl,
+        degree: degrees.get(decl.id) ?? { in: 0, out: 0 },
+        out,
+        refs: out.flatMap((rel) => {
+          const target = byId.get(rel.target);
+
+          return target ? [{ id: target.id, name: target.name, kind: target.kind }] : [];
+        }),
+      },
+      className: `decl decl--${decl.kind}`,
+      ...handlePositions("DOWN"),
+    };
+  });
 
   const edges: DeclEdge[] = relationships.map((rel) => {
     const style = REL_STYLES[rel.kind];
