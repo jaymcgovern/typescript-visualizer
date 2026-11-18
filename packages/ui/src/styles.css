@@ -815,6 +815,8 @@
 }
 
 .tsviz .filter-bar {
+  /* Anchors the pop-ups. */
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -883,11 +885,6 @@
   gap: 2px;
 }
 
-/* The pop-ups' anchors: "not drawn" and "?". */
-.tsviz .filter-bar__menu {
-  position: relative;
-}
-
 .tsviz .filter-bar__dropped {
   padding: 1px 7px;
   border: 1px solid transparent;
@@ -931,13 +928,19 @@
   border-color: var(--tsviz-muted);
 }
 
-/* Opens upwards from the bar, centred over its button. */
+/*
+ * Opens upwards from the bar, centred over the bar rather than its button (a
+ * button near the end of a wide bar would push it off the screen), and never
+ * wider than the screen.
+ */
 .tsviz .filter-popup {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   bottom: calc(100% + 10px);
+  box-sizing: border-box;
   width: 360px;
+  max-width: calc(100vw - 32px);
   padding: 10px 12px;
   background: var(--tsviz-card-bg);
   border: 1px solid var(--tsviz-border);
