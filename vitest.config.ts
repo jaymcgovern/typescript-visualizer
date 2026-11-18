@@ -8,9 +8,13 @@ export default defineConfig({
   resolve: { conditions: [SOURCE, ...defaultClientConditions] },
   ssr: { resolve: { conditions: [SOURCE, ...defaultServerConditions] } },
   test: {
-    projects: ["graph", "parser", "mcp"].map((name) => ({
-      extends: true,
-      test: { name, root: `packages/${name}`, include: ["test/**/*.test.ts"] },
-    })),
+    projects: [
+      ...["graph", "parser", "mcp", "ui"].map((name) => ({
+        extends: true,
+        test: { name, root: `packages/${name}`, include: ["test/**/*.test.ts"] },
+      })),
+      // The demo app has its own Vite config.
+      "apps/web",
+    ],
   },
 });

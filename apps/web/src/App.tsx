@@ -1,7 +1,7 @@
 import { useRef, useState, type DragEvent } from "react";
-import { GraphCanvas } from "./components/GraphCanvas";
+import { GraphCanvas, type Direction } from "@tsviz/ui";
+import elkWorkerUrl from "elkjs/lib/elk-worker.min.js?url";
 import { useGraphLoader } from "./data/useGraphLoader";
-import type { Direction } from "./layout/elkGraph";
 
 export function App() {
   const { state, loadUrl, loadFile, dismissError } = useGraphLoader();
@@ -89,7 +89,12 @@ export function App() {
 
       <main className="canvas">
         {shown ? (
-          <GraphCanvas key={shown.loadId} graph={shown.loaded.graph} direction={direction} />
+          <GraphCanvas
+            key={shown.loadId}
+            graph={shown.loaded.graph}
+            direction={direction}
+            layoutWorkerUrl={elkWorkerUrl}
+          />
         ) : state.status === "loading" ? (
           <p className="placeholder">Loading {state.source}…</p>
         ) : (

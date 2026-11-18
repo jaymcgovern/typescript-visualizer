@@ -49,6 +49,7 @@ export default defineConfig({
     fs: { allow: [repoRoot] },
   },
   test: {
+    name: "web",
     include: ["test/**/*.test.ts"],
   },
 });

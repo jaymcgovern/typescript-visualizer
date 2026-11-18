@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tsviz/graph": "^0.1.0",
+    "@tsviz/ui": "^0.1.0",
     "@xyflow/react": "^12.12.1",
     "elkjs": "^0.12.1",
     "react": "^19.3.1",

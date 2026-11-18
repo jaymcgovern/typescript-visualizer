@@ -5,6 +5,7 @@
     "packages/graph",
     "packages/parser",
     "packages/mcp",
+    "packages/ui",
     "apps/web"
   ],
   "type": "module",
