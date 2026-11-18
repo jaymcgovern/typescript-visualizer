@@ -9,10 +9,10 @@
     "node": true,
     "es2022": true
   },
-  "ignorePatterns": ["fixtures/**", "web/dist/**"],
+  "ignorePatterns": ["fixtures/**", "**/dist/**"],
   "overrides": [
     {
-      "files": ["web/src/**"],
+      "files": ["apps/web/src/**"],
       "plugins": ["typescript", "unicorn", "oxc", "import", "react"],
       "env": {
         "browser": true,
@@ -29,7 +29,7 @@
       }
     },
     {
-      "files": ["web/test/**"],
+      "files": ["apps/web/test/**"],
       "rules": {
         "vitest/valid-expect": [
           "error",

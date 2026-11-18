@@ -1,0 +1,30 @@
+{
+  "name": "@tsviz/parser",
+  "version": "0.1.0",
+  "description": "Extract TypeScript declarations and their relationships into graph JSON",
+  "license": "ISC",
+  "bin": {
+    "tsviz-graph": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "@tsviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --root ../.. --project parser",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@tsviz/graph": "^0.1.0",
+    "ts-morph": "^28.0.0"
+  }
+}

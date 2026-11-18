@@ -1,0 +1,1377 @@
+{
+  "version": 1,
+  "meta": {
+    "root": ".",
+    "files": [
+      "fixtures/agent/documented.ts",
+      "fixtures/agent/unresolved.ts",
+      "fixtures/basic/types.ts",
+      "fixtures/classes/animal.ts",
+      "fixtures/classes/base.ts",
+      "fixtures/classes/dog.ts",
+      "fixtures/classes/owner.ts",
+      "fixtures/dmp/playback-session.ts",
+      "fixtures/edge-cases/excluded.ts",
+      "fixtures/edge-cases/externals.ts",
+      "fixtures/edge-cases/import-type.ts",
+      "fixtures/edge-cases/merging.ts",
+      "fixtures/edge-cases/overloads.ts",
+      "fixtures/edge-cases/param-props.ts",
+      "fixtures/edge-cases/signatures.ts",
+      "fixtures/enums-fns/status.ts",
+      "fixtures/generics/box.ts",
+      "fixtures/generics/use.ts",
+      "fixtures/modules/a.ts",
+      "fixtures/modules/reexport.ts",
+      "fixtures/modules/uses.ts",
+      "fixtures/unions/conditional.ts",
+      "fixtures/unions/shapes.ts"
+    ],
+    "includeExternal": false,
+    "dropped": {
+      "external": 6,
+      "unresolved": 2,
+      "samples": [
+        {
+          "from": "fixtures/agent/unresolved.ts#Broken",
+          "name": "Missing",
+          "line": 2
+        },
+        {
+          "from": "fixtures/edge-cases/externals.ts#Mixed",
+          "name": "mixin(Object)",
+          "line": 14
+        }
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "fixtures/agent/documented.ts#Named",
+      "name": "Named",
+      "kind": "interface",
+      "file": "fixtures/agent/documented.ts",
+      "line": 1,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export interface Named",
+      "members": [
+        {
+          "name": "name",
+          "kind": "property",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/agent/documented.ts#Person",
+      "name": "Person",
+      "kind": "class",
+      "file": "fixtures/agent/documented.ts",
+      "line": 10,
+      "endLine": 13,
+      "exported": true,
+      "signature": "export class Person implements Named",
+      "doc": "A person who can own pets.",
+      "members": [
+        {
+          "name": "name",
+          "kind": "property"
+        },
+        {
+          "name": "pets",
+          "kind": "property",
+          "type": "Pet[]"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/agent/documented.ts#Pet",
+      "name": "Pet",
+      "kind": "interface",
+      "file": "fixtures/agent/documented.ts",
+      "line": 16,
+      "endLine": 18,
+      "exported": true,
+      "signature": "export interface Pet extends Named",
+      "doc": "A pet that can be adopted.",
+      "members": [
+        {
+          "name": "owner",
+          "kind": "property",
+          "type": "Person"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/agent/documented.ts#defaultPet",
+      "name": "defaultPet",
+      "kind": "variable",
+      "file": "fixtures/agent/documented.ts",
+      "line": 28,
+      "endLine": 28,
+      "exported": true,
+      "signature": "export const defaultPet: Pet",
+      "doc": "The default pet."
+    },
+    {
+      "id": "fixtures/agent/documented.ts#lookup",
+      "name": "lookup",
+      "kind": "function",
+      "file": "fixtures/agent/documented.ts",
+      "line": 21,
+      "endLine": 25,
+      "exported": true,
+      "signature": "export function lookup(name: string): Pet\nexport function lookup(name: string, owner: Person): Pet",
+      "doc": "Looks a pet up by name."
+    },
+    {
+      "id": "fixtures/agent/unresolved.ts#Broken",
+      "name": "Broken",
+      "kind": "type",
+      "file": "fixtures/agent/unresolved.ts",
+      "line": 2,
+      "endLine": 2,
+      "exported": true,
+      "signature": "export type Broken = Missing"
+    },
+    {
+      "id": "fixtures/basic/types.ts#Address",
+      "name": "Address",
+      "kind": "interface",
+      "file": "fixtures/basic/types.ts",
+      "line": 1,
+      "endLine": 4,
+      "exported": true,
+      "signature": "export interface Address",
+      "members": [
+        {
+          "name": "street",
+          "kind": "property",
+          "type": "string"
+        },
+        {
+          "name": "city",
+          "kind": "property",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/basic/types.ts#Maybe",
+      "name": "Maybe",
+      "kind": "type",
+      "file": "fixtures/basic/types.ts",
+      "line": 18,
+      "endLine": 18,
+      "exported": true,
+      "signature": "export type Maybe = User | null"
+    },
+    {
+      "id": "fixtures/basic/types.ts#Named",
+      "name": "Named",
+      "kind": "interface",
+      "file": "fixtures/basic/types.ts",
+      "line": 6,
+      "endLine": 8,
+      "exported": true,
+      "signature": "export interface Named",
+      "members": [
+        {
+          "name": "name",
+          "kind": "property",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/basic/types.ts#Registry",
+      "name": "Registry",
+      "kind": "interface",
+      "file": "fixtures/basic/types.ts",
+      "line": 20,
+      "endLine": 22,
+      "exported": true,
+      "signature": "export interface Registry",
+      "members": [
+        {
+          "name": "users",
+          "kind": "property",
+          "type": "Map<string, User>"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/basic/types.ts#User",
+      "name": "User",
+      "kind": "interface",
+      "file": "fixtures/basic/types.ts",
+      "line": 10,
+      "endLine": 14,
+      "exported": true,
+      "signature": "export interface User extends Named",
+      "members": [
+        {
+          "name": "id",
+          "kind": "property",
+          "type": "number"
+        },
+        {
+          "name": "address",
+          "kind": "property",
+          "type": "Address"
+        },
+        {
+          "name": "manager",
+          "kind": "property",
+          "type": "User"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/basic/types.ts#UserId",
+      "name": "UserId",
+      "kind": "type",
+      "file": "fixtures/basic/types.ts",
+      "line": 16,
+      "endLine": 16,
+      "exported": true,
+      "signature": "export type UserId = number"
+    },
+    {
+      "id": "fixtures/classes/animal.ts#Animal",
+      "name": "Animal",
+      "kind": "interface",
+      "file": "fixtures/classes/animal.ts",
+      "line": 1,
+      "endLine": 4,
+      "exported": true,
+      "signature": "export interface Animal",
+      "members": [
+        {
+          "name": "name",
+          "kind": "property",
+          "type": "string"
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "type": "(): string"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/classes/animal.ts#Walkable",
+      "name": "Walkable",
+      "kind": "interface",
+      "file": "fixtures/classes/animal.ts",
+      "line": 6,
+      "endLine": 8,
+      "exported": true,
+      "signature": "export interface Walkable",
+      "members": [
+        {
+          "name": "walk",
+          "kind": "method",
+          "type": "(distance: number): void"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/classes/base.ts#Base",
+      "name": "Base",
+      "kind": "class",
+      "file": "fixtures/classes/base.ts",
+      "line": 1,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export abstract class Base",
+      "members": [
+        {
+          "name": "id",
+          "kind": "property"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/classes/dog.ts#Dog",
+      "name": "Dog",
+      "kind": "class",
+      "file": "fixtures/classes/dog.ts",
+      "line": 5,
+      "endLine": 21,
+      "exported": true,
+      "signature": "export class Dog extends Base implements Animal, Walkable",
+      "members": [
+        {
+          "name": "name",
+          "kind": "property"
+        },
+        {
+          "name": "owner",
+          "kind": "property",
+          "type": "Owner"
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "type": "(): string"
+        },
+        {
+          "name": "walk",
+          "kind": "method",
+          "type": "(distance: number): void"
+        },
+        {
+          "name": "adopt",
+          "kind": "method",
+          "type": "(pet: Animal): Dog"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/classes/owner.ts#Owner",
+      "name": "Owner",
+      "kind": "class",
+      "file": "fixtures/classes/owner.ts",
+      "line": 3,
+      "endLine": 5,
+      "exported": true,
+      "signature": "export class Owner",
+      "members": [
+        {
+          "name": "dogs",
+          "kind": "property",
+          "type": "Dog[]"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/dmp/playback-session.ts#PlaybackSession",
+      "name": "PlaybackSession",
+      "kind": "interface",
+      "file": "fixtures/dmp/playback-session.ts",
+      "line": 6,
+      "endLine": 11,
+      "exported": true,
+      "signature": "export interface PlaybackSession",
+      "members": [
+        {
+          "name": "prepare",
+          "kind": "method",
+          "type": "(positionType: PositionType): Promise<void>"
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "type": "(positionType: PositionType): Promise<void>"
+        },
+        {
+          "name": "muted",
+          "kind": "property",
+          "type": "boolean"
+        },
+        {
+          "name": "volume",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/dmp/playback-session.ts#PositionType",
+      "name": "PositionType",
+      "kind": "enum",
+      "file": "fixtures/dmp/playback-session.ts",
+      "line": 1,
+      "endLine": 4,
+      "exported": false,
+      "signature": "enum PositionType",
+      "members": [
+        {
+          "name": "Start",
+          "kind": "enumMember"
+        },
+        {
+          "name": "Bookmark",
+          "kind": "enumMember"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/excluded.ts#Excluded",
+      "name": "Excluded",
+      "kind": "interface",
+      "file": "fixtures/edge-cases/excluded.ts",
+      "line": 2,
+      "endLine": 4,
+      "exported": true,
+      "signature": "export interface Excluded",
+      "members": [
+        {
+          "name": "x",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/externals.ts#Mixed",
+      "name": "Mixed",
+      "kind": "class",
+      "file": "fixtures/edge-cases/externals.ts",
+      "line": 14,
+      "endLine": 14,
+      "exported": true,
+      "signature": "export class Mixed extends mixin(Object)",
+      "members": []
+    },
+    {
+      "id": "fixtures/edge-cases/externals.ts#UsesExternal",
+      "name": "UsesExternal",
+      "kind": "interface",
+      "file": "fixtures/edge-cases/externals.ts",
+      "line": 5,
+      "endLine": 9,
+      "exported": true,
+      "signature": "export interface UsesExternal",
+      "members": [
+        {
+          "name": "aliased",
+          "kind": "property",
+          "type": "P"
+        },
+        {
+          "name": "direct",
+          "kind": "property",
+          "type": "Project"
+        },
+        {
+          "name": "map",
+          "kind": "property",
+          "type": "Map<string, number>"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/externals.ts#mixin",
+      "name": "mixin",
+      "kind": "function",
+      "file": "fixtures/edge-cases/externals.ts",
+      "line": 11,
+      "endLine": 11,
+      "exported": false,
+      "signature": "declare function mixin<T>(base: T): T",
+      "typeParams": [
+        "T"
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/import-type.ts#I",
+      "name": "I",
+      "kind": "type",
+      "file": "fixtures/edge-cases/import-type.ts",
+      "line": 1,
+      "endLine": 1,
+      "exported": true,
+      "signature": "export type I = import(\"./merging\").B"
+    },
+    {
+      "id": "fixtures/edge-cases/import-type.ts#J",
+      "name": "J",
+      "kind": "type",
+      "file": "fixtures/edge-cases/import-type.ts",
+      "line": 3,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export type J = typeof import(\"./merging\").Status"
+    },
+    {
+      "id": "fixtures/edge-cases/merging.ts#A",
+      "name": "A",
+      "kind": "interface",
+      "file": "fixtures/edge-cases/merging.ts",
+      "line": 1,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export interface A",
+      "members": [
+        {
+          "name": "a",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/merging.ts#B",
+      "name": "B",
+      "kind": "interface",
+      "file": "fixtures/edge-cases/merging.ts",
+      "line": 5,
+      "endLine": 7,
+      "exported": true,
+      "signature": "export interface B",
+      "members": [
+        {
+          "name": "b",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/merging.ts#Foo",
+      "name": "Foo",
+      "kind": "class",
+      "file": "fixtures/edge-cases/merging.ts",
+      "line": 10,
+      "endLine": 15,
+      "exported": true,
+      "signature": "export class Foo",
+      "members": [
+        {
+          "name": "extra",
+          "kind": "property",
+          "type": "A"
+        },
+        {
+          "name": "base",
+          "kind": "property",
+          "type": "B"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/merging.ts#Status",
+      "name": "Status",
+      "kind": "type",
+      "file": "fixtures/edge-cases/merging.ts",
+      "line": 19,
+      "endLine": 19,
+      "exported": true,
+      "signature": "export type Status = (typeof Status)[keyof typeof Status]"
+    },
+    {
+      "id": "fixtures/edge-cases/merging.ts#Status@variable",
+      "name": "Status",
+      "kind": "variable",
+      "file": "fixtures/edge-cases/merging.ts",
+      "line": 18,
+      "endLine": 18,
+      "exported": true,
+      "signature": "export const Status"
+    },
+    {
+      "id": "fixtures/edge-cases/overloads.ts#Svc",
+      "name": "Svc",
+      "kind": "class",
+      "file": "fixtures/edge-cases/overloads.ts",
+      "line": 9,
+      "endLine": 15,
+      "exported": true,
+      "signature": "export class Svc",
+      "members": [
+        {
+          "name": "run",
+          "kind": "method",
+          "type": "(a: A): A"
+        },
+        {
+          "name": "run",
+          "kind": "method",
+          "type": "(b: B): B"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/overloads.ts#f",
+      "name": "f",
+      "kind": "function",
+      "file": "fixtures/edge-cases/overloads.ts",
+      "line": 3,
+      "endLine": 7,
+      "exported": true,
+      "signature": "export function f(a: A): A\nexport function f(b: B): B"
+    },
+    {
+      "id": "fixtures/edge-cases/param-props.ts#P",
+      "name": "P",
+      "kind": "class",
+      "file": "fixtures/edge-cases/param-props.ts",
+      "line": 3,
+      "endLine": 10,
+      "exported": true,
+      "signature": "export class P",
+      "members": [
+        {
+          "name": "owner",
+          "kind": "property",
+          "type": "A"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/edge-cases/signatures.ts#Dict",
+      "name": "Dict",
+      "kind": "interface",
+      "file": "fixtures/edge-cases/signatures.ts",
+      "line": 3,
+      "endLine": 7,
+      "exported": true,
+      "signature": "export interface Dict",
+      "members": [
+        {
+          "name": "[k: string]",
+          "kind": "index",
+          "type": "A"
+        },
+        {
+          "name": "call",
+          "kind": "call",
+          "type": "(q: B): A"
+        },
+        {
+          "name": "new",
+          "kind": "construct",
+          "type": "(q: B): Dict"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/enums-fns/status.ts#Account",
+      "name": "Account",
+      "kind": "interface",
+      "file": "fixtures/enums-fns/status.ts",
+      "line": 6,
+      "endLine": 8,
+      "exported": true,
+      "signature": "export interface Account",
+      "members": [
+        {
+          "name": "status",
+          "kind": "property",
+          "type": "Status"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/enums-fns/status.ts#DefaultStatusType",
+      "name": "DefaultStatusType",
+      "kind": "type",
+      "file": "fixtures/enums-fns/status.ts",
+      "line": 12,
+      "endLine": 12,
+      "exported": true,
+      "signature": "export type DefaultStatusType = typeof defaultStatus"
+    },
+    {
+      "id": "fixtures/enums-fns/status.ts#Status",
+      "name": "Status",
+      "kind": "enum",
+      "file": "fixtures/enums-fns/status.ts",
+      "line": 1,
+      "endLine": 4,
+      "exported": true,
+      "signature": "export enum Status",
+      "members": [
+        {
+          "name": "Active",
+          "kind": "enumMember"
+        },
+        {
+          "name": "Inactive",
+          "kind": "enumMember"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/enums-fns/status.ts#defaultStatus",
+      "name": "defaultStatus",
+      "kind": "variable",
+      "file": "fixtures/enums-fns/status.ts",
+      "line": 10,
+      "endLine": 10,
+      "exported": true,
+      "signature": "export const defaultStatus: Status"
+    },
+    {
+      "id": "fixtures/enums-fns/status.ts#describe",
+      "name": "describe",
+      "kind": "function",
+      "file": "fixtures/enums-fns/status.ts",
+      "line": 14,
+      "endLine": 16,
+      "exported": true,
+      "signature": "export function describe(s: Status): string"
+    },
+    {
+      "id": "fixtures/generics/box.ts#Box",
+      "name": "Box",
+      "kind": "interface",
+      "file": "fixtures/generics/box.ts",
+      "line": 5,
+      "endLine": 7,
+      "exported": true,
+      "signature": "export interface Box<T>",
+      "typeParams": [
+        "T"
+      ],
+      "members": [
+        {
+          "name": "value",
+          "kind": "property",
+          "type": "T"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/generics/box.ts#Keyed",
+      "name": "Keyed",
+      "kind": "interface",
+      "file": "fixtures/generics/box.ts",
+      "line": 1,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export interface Keyed",
+      "members": [
+        {
+          "name": "key",
+          "kind": "property",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/generics/box.ts#Pair",
+      "name": "Pair",
+      "kind": "interface",
+      "file": "fixtures/generics/box.ts",
+      "line": 9,
+      "endLine": 12,
+      "exported": true,
+      "signature": "export interface Pair<A, B extends Keyed = Keyed>",
+      "typeParams": [
+        "A",
+        "B"
+      ],
+      "members": [
+        {
+          "name": "first",
+          "kind": "property",
+          "type": "A"
+        },
+        {
+          "name": "second",
+          "kind": "property",
+          "type": "B"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/generics/box.ts#Repo",
+      "name": "Repo",
+      "kind": "interface",
+      "file": "fixtures/generics/box.ts",
+      "line": 14,
+      "endLine": 17,
+      "exported": true,
+      "signature": "export interface Repo<T>",
+      "typeParams": [
+        "T"
+      ],
+      "members": [
+        {
+          "name": "items",
+          "kind": "property",
+          "type": "Box<T>[]"
+        },
+        {
+          "name": "find",
+          "kind": "method",
+          "type": "(id: string): Box<T> | undefined"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/generics/box.ts#unwrap",
+      "name": "unwrap",
+      "kind": "function",
+      "file": "fixtures/generics/box.ts",
+      "line": 19,
+      "endLine": 21,
+      "exported": true,
+      "signature": "export function unwrap<T extends Keyed>(b: Box<T>): T",
+      "typeParams": [
+        "T"
+      ]
+    },
+    {
+      "id": "fixtures/generics/use.ts#Boxed",
+      "name": "Boxed",
+      "kind": "type",
+      "file": "fixtures/generics/use.ts",
+      "line": 3,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export type Boxed = Box<Keyed>"
+    },
+    {
+      "id": "fixtures/modules/a.ts#A",
+      "name": "A",
+      "kind": "interface",
+      "file": "fixtures/modules/a.ts",
+      "line": 1,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export interface A",
+      "members": [
+        {
+          "name": "x",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/modules/a.ts#Internal",
+      "name": "Internal",
+      "kind": "type",
+      "file": "fixtures/modules/a.ts",
+      "line": 5,
+      "endLine": 5,
+      "exported": true,
+      "signature": "export type Internal = string"
+    },
+    {
+      "id": "fixtures/modules/a.ts#NS",
+      "name": "NS",
+      "kind": "namespace",
+      "file": "fixtures/modules/a.ts",
+      "line": 7,
+      "endLine": 11,
+      "exported": true,
+      "signature": "export namespace NS"
+    },
+    {
+      "id": "fixtures/modules/a.ts#NS.Inner",
+      "name": "Inner",
+      "kind": "interface",
+      "file": "fixtures/modules/a.ts",
+      "line": 8,
+      "endLine": 10,
+      "exported": true,
+      "signature": "export interface Inner",
+      "members": [
+        {
+          "name": "a",
+          "kind": "property",
+          "type": "A"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/modules/uses.ts#UsesB",
+      "name": "UsesB",
+      "kind": "interface",
+      "file": "fixtures/modules/uses.ts",
+      "line": 5,
+      "endLine": 8,
+      "exported": true,
+      "signature": "export interface UsesB",
+      "members": [
+        {
+          "name": "b",
+          "kind": "property",
+          "type": "B"
+        },
+        {
+          "name": "inner",
+          "kind": "property",
+          "type": "NS.Inner"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/unions/conditional.ts#Cond",
+      "name": "Cond",
+      "kind": "type",
+      "file": "fixtures/unions/conditional.ts",
+      "line": 3,
+      "endLine": 3,
+      "exported": true,
+      "signature": "export type Cond<T> = T extends Circle ? Square : never",
+      "typeParams": [
+        "T"
+      ]
+    },
+    {
+      "id": "fixtures/unions/shapes.ts#Circle",
+      "name": "Circle",
+      "kind": "interface",
+      "file": "fixtures/unions/shapes.ts",
+      "line": 1,
+      "endLine": 4,
+      "exported": true,
+      "signature": "export interface Circle",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "type": "\"circle\""
+        },
+        {
+          "name": "radius",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "fixtures/unions/shapes.ts#Color",
+      "name": "Color",
+      "kind": "type",
+      "file": "fixtures/unions/shapes.ts",
+      "line": 11,
+      "endLine": 11,
+      "exported": true,
+      "signature": "export type Color = string"
+    },
+    {
+      "id": "fixtures/unions/shapes.ts#Drawable",
+      "name": "Drawable",
+      "kind": "type",
+      "file": "fixtures/unions/shapes.ts",
+      "line": 15,
+      "endLine": 15,
+      "exported": true,
+      "signature": "export type Drawable = Shape & { color: Color }"
+    },
+    {
+      "id": "fixtures/unions/shapes.ts#Shape",
+      "name": "Shape",
+      "kind": "type",
+      "file": "fixtures/unions/shapes.ts",
+      "line": 13,
+      "endLine": 13,
+      "exported": true,
+      "signature": "export type Shape = Circle | Square"
+    },
+    {
+      "id": "fixtures/unions/shapes.ts#Square",
+      "name": "Square",
+      "kind": "interface",
+      "file": "fixtures/unions/shapes.ts",
+      "line": 6,
+      "endLine": 9,
+      "exported": true,
+      "signature": "export interface Square",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "type": "\"square\""
+        },
+        {
+          "name": "side",
+          "kind": "property",
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "fixtures/agent/documented.ts#Person",
+      "target": "fixtures/agent/documented.ts#Named",
+      "kind": "implements",
+      "line": 10
+    },
+    {
+      "source": "fixtures/agent/documented.ts#Person",
+      "target": "fixtures/agent/documented.ts#Pet",
+      "kind": "property",
+      "label": "pets",
+      "line": 12
+    },
+    {
+      "source": "fixtures/agent/documented.ts#Pet",
+      "target": "fixtures/agent/documented.ts#Named",
+      "kind": "extends",
+      "line": 16
+    },
+    {
+      "source": "fixtures/agent/documented.ts#Pet",
+      "target": "fixtures/agent/documented.ts#Person",
+      "kind": "property",
+      "label": "owner",
+      "line": 17
+    },
+    {
+      "source": "fixtures/agent/documented.ts#defaultPet",
+      "target": "fixtures/agent/documented.ts#Pet",
+      "kind": "references",
+      "line": 28
+    },
+    {
+      "source": "fixtures/agent/documented.ts#lookup",
+      "target": "fixtures/agent/documented.ts#Person",
+      "kind": "param",
+      "label": "owner",
+      "line": 22
+    },
+    {
+      "source": "fixtures/agent/documented.ts#lookup",
+      "target": "fixtures/agent/documented.ts#Pet",
+      "kind": "returns",
+      "label": "lookup",
+      "line": 21
+    },
+    {
+      "source": "fixtures/basic/types.ts#Maybe",
+      "target": "fixtures/basic/types.ts#User",
+      "kind": "union",
+      "line": 18
+    },
+    {
+      "source": "fixtures/basic/types.ts#Registry",
+      "target": "fixtures/basic/types.ts#User",
+      "kind": "typeArg",
+      "label": "users",
+      "line": 21
+    },
+    {
+      "source": "fixtures/basic/types.ts#User",
+      "target": "fixtures/basic/types.ts#Address",
+      "kind": "property",
+      "label": "address",
+      "line": 12
+    },
+    {
+      "source": "fixtures/basic/types.ts#User",
+      "target": "fixtures/basic/types.ts#Named",
+      "kind": "extends",
+      "line": 10
+    },
+    {
+      "source": "fixtures/basic/types.ts#User",
+      "target": "fixtures/basic/types.ts#User",
+      "kind": "property",
+      "label": "manager",
+      "line": 13
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/animal.ts#Animal",
+      "kind": "implements",
+      "line": 5
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/animal.ts#Animal",
+      "kind": "param",
+      "label": "pet",
+      "line": 17
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/animal.ts#Walkable",
+      "kind": "implements",
+      "line": 5
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/base.ts#Base",
+      "kind": "extends",
+      "line": 5
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/dog.ts#Dog",
+      "kind": "returns",
+      "label": "adopt",
+      "line": 17
+    },
+    {
+      "source": "fixtures/classes/dog.ts#Dog",
+      "target": "fixtures/classes/owner.ts#Owner",
+      "kind": "property",
+      "label": "owner",
+      "line": 7
+    },
+    {
+      "source": "fixtures/classes/owner.ts#Owner",
+      "target": "fixtures/classes/dog.ts#Dog",
+      "kind": "property",
+      "label": "dogs",
+      "line": 4
+    },
+    {
+      "source": "fixtures/dmp/playback-session.ts#PlaybackSession",
+      "target": "fixtures/dmp/playback-session.ts#PositionType",
+      "kind": "param",
+      "label": "positionType",
+      "line": 7
+    },
+    {
+      "source": "fixtures/edge-cases/import-type.ts#I",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "references",
+      "line": 1
+    },
+    {
+      "source": "fixtures/edge-cases/import-type.ts#J",
+      "target": "fixtures/edge-cases/merging.ts#Status@variable",
+      "kind": "typeof",
+      "line": 3
+    },
+    {
+      "source": "fixtures/edge-cases/merging.ts#Foo",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "property",
+      "label": "extra",
+      "line": 11
+    },
+    {
+      "source": "fixtures/edge-cases/merging.ts#Foo",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "property",
+      "label": "base",
+      "line": 14
+    },
+    {
+      "source": "fixtures/edge-cases/merging.ts#Status",
+      "target": "fixtures/edge-cases/merging.ts#Status@variable",
+      "kind": "typeof",
+      "line": 19
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#Svc",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "param",
+      "label": "a",
+      "line": 10
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#Svc",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "returns",
+      "label": "run",
+      "line": 10
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#Svc",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "param",
+      "label": "b",
+      "line": 11
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#Svc",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "returns",
+      "label": "run",
+      "line": 11
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#f",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "param",
+      "label": "a",
+      "line": 3
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#f",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "returns",
+      "label": "f",
+      "line": 3
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#f",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "param",
+      "label": "b",
+      "line": 4
+    },
+    {
+      "source": "fixtures/edge-cases/overloads.ts#f",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "returns",
+      "label": "f",
+      "line": 4
+    },
+    {
+      "source": "fixtures/edge-cases/param-props.ts#P",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "property",
+      "label": "owner",
+      "line": 5
+    },
+    {
+      "source": "fixtures/edge-cases/param-props.ts#P",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "param",
+      "label": "plain",
+      "line": 6
+    },
+    {
+      "source": "fixtures/edge-cases/signatures.ts#Dict",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "property",
+      "label": "[k: string]",
+      "line": 4
+    },
+    {
+      "source": "fixtures/edge-cases/signatures.ts#Dict",
+      "target": "fixtures/edge-cases/merging.ts#A",
+      "kind": "returns",
+      "label": "call",
+      "line": 5
+    },
+    {
+      "source": "fixtures/edge-cases/signatures.ts#Dict",
+      "target": "fixtures/edge-cases/merging.ts#B",
+      "kind": "param",
+      "label": "q",
+      "line": 5
+    },
+    {
+      "source": "fixtures/edge-cases/signatures.ts#Dict",
+      "target": "fixtures/edge-cases/signatures.ts#Dict",
+      "kind": "returns",
+      "label": "new",
+      "line": 6
+    },
+    {
+      "source": "fixtures/enums-fns/status.ts#Account",
+      "target": "fixtures/enums-fns/status.ts#Status",
+      "kind": "property",
+      "label": "status",
+      "line": 7
+    },
+    {
+      "source": "fixtures/enums-fns/status.ts#DefaultStatusType",
+      "target": "fixtures/enums-fns/status.ts#defaultStatus",
+      "kind": "typeof",
+      "line": 12
+    },
+    {
+      "source": "fixtures/enums-fns/status.ts#defaultStatus",
+      "target": "fixtures/enums-fns/status.ts#Status",
+      "kind": "references",
+      "line": 10
+    },
+    {
+      "source": "fixtures/enums-fns/status.ts#describe",
+      "target": "fixtures/enums-fns/status.ts#Status",
+      "kind": "param",
+      "label": "s",
+      "line": 14
+    },
+    {
+      "source": "fixtures/generics/box.ts#Pair",
+      "target": "fixtures/generics/box.ts#Keyed",
+      "kind": "references",
+      "label": "B",
+      "line": 9
+    },
+    {
+      "source": "fixtures/generics/box.ts#Repo",
+      "target": "fixtures/generics/box.ts#Box",
+      "kind": "property",
+      "label": "items",
+      "line": 15
+    },
+    {
+      "source": "fixtures/generics/box.ts#Repo",
+      "target": "fixtures/generics/box.ts#Box",
+      "kind": "returns",
+      "label": "find",
+      "line": 16
+    },
+    {
+      "source": "fixtures/generics/box.ts#unwrap",
+      "target": "fixtures/generics/box.ts#Box",
+      "kind": "param",
+      "label": "b",
+      "line": 19
+    },
+    {
+      "source": "fixtures/generics/box.ts#unwrap",
+      "target": "fixtures/generics/box.ts#Keyed",
+      "kind": "references",
+      "label": "T",
+      "line": 19
+    },
+    {
+      "source": "fixtures/generics/use.ts#Boxed",
+      "target": "fixtures/generics/box.ts#Box",
+      "kind": "references",
+      "line": 3
+    },
+    {
+      "source": "fixtures/generics/use.ts#Boxed",
+      "target": "fixtures/generics/box.ts#Keyed",
+      "kind": "typeArg",
+      "line": 3
+    },
+    {
+      "source": "fixtures/modules/a.ts#NS.Inner",
+      "target": "fixtures/modules/a.ts#A",
+      "kind": "property",
+      "label": "a",
+      "line": 9
+    },
+    {
+      "source": "fixtures/modules/uses.ts#UsesB",
+      "target": "fixtures/modules/a.ts#A",
+      "kind": "property",
+      "label": "b",
+      "line": 6
+    },
+    {
+      "source": "fixtures/modules/uses.ts#UsesB",
+      "target": "fixtures/modules/a.ts#NS.Inner",
+      "kind": "property",
+      "label": "inner",
+      "line": 7
+    },
+    {
+      "source": "fixtures/unions/conditional.ts#Cond",
+      "target": "fixtures/unions/shapes.ts#Circle",
+      "kind": "references",
+      "line": 3
+    },
+    {
+      "source": "fixtures/unions/conditional.ts#Cond",
+      "target": "fixtures/unions/shapes.ts#Square",
+      "kind": "references",
+      "line": 3
+    },
+    {
+      "source": "fixtures/unions/shapes.ts#Drawable",
+      "target": "fixtures/unions/shapes.ts#Color",
+      "kind": "intersection",
+      "line": 15
+    },
+    {
+      "source": "fixtures/unions/shapes.ts#Drawable",
+      "target": "fixtures/unions/shapes.ts#Shape",
+      "kind": "intersection",
+      "line": 15
+    },
+    {
+      "source": "fixtures/unions/shapes.ts#Shape",
+      "target": "fixtures/unions/shapes.ts#Circle",
+      "kind": "union",
+      "line": 13
+    },
+    {
+      "source": "fixtures/unions/shapes.ts#Shape",
+      "target": "fixtures/unions/shapes.ts#Square",
+      "kind": "union",
+      "line": 13
+    }
+  ]
+}

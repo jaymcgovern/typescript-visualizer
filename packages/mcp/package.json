@@ -1,0 +1,32 @@
+{
+  "name": "@tsviz/mcp",
+  "version": "0.1.0",
+  "description": "Serve a TypeScript declaration graph to AI agents over MCP",
+  "license": "ISC",
+  "bin": {
+    "tsviz-mcp": "./dist/server.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "@tsviz/source": "./src/tools.ts",
+      "types": "./dist/tools.d.ts",
+      "default": "./dist/tools.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --root ../.. --project mcp",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@tsviz/graph": "^0.1.0",
+    "@tsviz/parser": "^0.1.0",
+    "zod": "^4.6.7"
+  }
+}

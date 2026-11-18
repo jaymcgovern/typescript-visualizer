@@ -1,0 +1,23 @@
+{
+  "name": "@tsviz/graph",
+  "version": "0.1.0",
+  "description": "The TypeScript Visualizer graph format: types, validation and queries",
+  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "@tsviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p test",
+    "test": "vitest run --root ../.. --project graph",
+    "prepublishOnly": "npm run build"
+  }
+}
