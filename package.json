@@ -1,0 +1,36 @@
+{
+  "name": "typescript-visualizer",
+  "version": "1.0.0",
+  "description": "Extract TypeScript declarations and their relationships into graph JSON",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "graph": "tsx src/cli.ts",
+    "mcp": "tsx src/mcp/server.ts",
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "web": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "web:test": "npm --prefix web test",
+    "web:typecheck": "npm --prefix web run typecheck",
+    "graph:self": "tsx src/cli.ts \"src/**/*.ts\" --root . -o web/public/self.graph.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ts-morph": "^28.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "oxfmt": "^0.78.0",
+    "oxlint": "^1.93.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
