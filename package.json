@@ -1,6 +1,8 @@
 {
   "name": "tsviz-monorepo",
-  "private": true,
+  "repository": {
+    "url": "https://github.com/jaymcgovern/typescript-visualizer"
+  },
   "workspaces": [
     "packages/graph",
     "packages/parser",
