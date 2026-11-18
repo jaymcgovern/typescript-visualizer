@@ -19,9 +19,12 @@
     "graph": "tsx --conditions=@tsviz/source packages/parser/src/cli.ts",
     "mcp": "tsx --conditions=@tsviz/source packages/mcp/src/server.ts",
     "web": "npm run dev -w apps/web",
-    "graph:self": "npm run graph -- \"packages/*/src/**/*.ts\" --root . -o apps/web/public/self.graph.json"
+    "graph:self": "npm run graph -- \"packages/*/src/**/*.ts\" --root . -o apps/web/public/self.graph.json",
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm install --package-lock-only"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "@types/node": "^26.6.6",
     "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
