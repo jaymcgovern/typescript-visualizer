@@ -24,6 +24,11 @@ export function initialGraphUrl(search: string = window.location.search): string
   return new URLSearchParams(search).get("graph") || "/graph.json";
 }
 
+/** `?focus=<declaration id>`: the card to zoom in on when the initial graph loads. */
+export function initialFocusId(search: string = window.location.search): string | undefined {
+  return new URLSearchParams(search).get("focus") || undefined;
+}
+
 function parseJson(text: string, source: string): unknown {
   try {
     return JSON.parse(text);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialGraphUrl, loadGraphFromUrl } from "../src/data/loadGraph";
+import { initialFocusId, initialGraphUrl, loadGraphFromUrl } from "../src/data/loadGraph";
 
 const minimal = () => ({
   version: 1,
@@ -36,5 +36,14 @@ describe("initialGraphUrl", () => {
     expect(initialGraphUrl("?graph=https%3A%2F%2Fx.dev%2Fg.json")).toBe("https://x.dev/g.json");
     expect(initialGraphUrl("")).toBe("/graph.json");
     expect(initialGraphUrl("?graph=")).toBe("/graph.json");
+  });
+});
+
+describe("initialFocusId", () => {
+  it("reads ?focus=, ignoring an empty one", () => {
+    expect(initialFocusId("?focus=src%2Fa.ts%23A")).toBe("src/a.ts#A");
+    expect(initialFocusId("?graph=/g.json&focus=a.ts%23B")).toBe("a.ts#B");
+    expect(initialFocusId("?focus=")).toBeUndefined();
+    expect(initialFocusId("")).toBeUndefined();
   });
 });

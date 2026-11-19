@@ -1149,3 +1149,204 @@
   stroke-width: 1.5;
   fill: none;
 }
+
+/*
+ * Layout: the declarations list beside the canvas. The list is a fixed-width
+ * column; the canvas takes the rest.
+ */
+.tsviz .tsviz__layout {
+  container: tsviz-layout / inline-size;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.tsviz .tsviz__canvas {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Declarations list. */
+.tsviz .outline {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 260px;
+  min-height: 0;
+  background: var(--tsviz-surface);
+  border-right: 1px solid var(--tsviz-border);
+  font-size: 13px;
+}
+
+.tsviz .outline--closed {
+  width: auto;
+  padding: 8px 6px;
+}
+
+.tsviz .outline__head {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--tsviz-border);
+}
+
+.tsviz .outline__filter {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--tsviz-border);
+  border-radius: 6px;
+  background: var(--tsviz-bg);
+  color: var(--tsviz-fg);
+  font: 13px var(--tsviz-font-sans);
+}
+
+.tsviz .outline__filter:focus-visible {
+  outline: 2px solid var(--tsviz-kind-interface);
+  outline-offset: -1px;
+}
+
+.tsviz .outline__toggle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--tsviz-muted);
+}
+
+.tsviz .outline__toggle:hover {
+  color: var(--tsviz-fg);
+}
+
+.tsviz .outline__status {
+  margin: 0;
+  padding: 6px 12px 0;
+  color: var(--tsviz-muted);
+  font-size: 12px;
+}
+
+.tsviz .outline__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 0 12px;
+}
+
+.tsviz .outline__section h3 {
+  margin: 0;
+  font: inherit;
+}
+
+.tsviz .outline__section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tsviz .outline__group,
+.tsviz .outline__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--tsviz-fg);
+  text-align: left;
+}
+
+.tsviz .outline__group {
+  padding: 6px 12px 4px 8px;
+  font-weight: 600;
+}
+
+.tsviz .outline__chevron {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-right: 1.5px solid var(--tsviz-muted);
+  border-bottom: 1.5px solid var(--tsviz-muted);
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.tsviz .outline__group[aria-expanded="false"] .outline__chevron {
+  transform: rotate(-45deg);
+}
+
+.tsviz .outline__group-name {
+  flex: 1;
+}
+
+.tsviz .outline__count {
+  color: var(--tsviz-muted);
+  font-weight: 400;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tsviz .outline__item {
+  padding: 3px 12px 3px 36px;
+  /* Marks the selected row without shifting its text. */
+  box-shadow: inset 3px 0 0 transparent;
+}
+
+.tsviz .outline__group:hover,
+.tsviz .outline__item:hover,
+.tsviz .outline__group:focus-visible,
+.tsviz .outline__item:focus-visible {
+  background: var(--tsviz-bg);
+  outline: none;
+}
+
+.tsviz .outline__item[aria-current="true"] {
+  background: color-mix(in srgb, var(--tsviz-kind-color) 16%, transparent);
+  box-shadow: inset 3px 0 0 var(--tsviz-kind-color);
+}
+
+.tsviz .outline__item--faded {
+  color: var(--tsviz-muted);
+}
+
+.tsviz .outline__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tsviz .outline__member {
+  flex: none;
+  color: var(--tsviz-muted);
+  font: 12px var(--tsviz-font-mono);
+}
+
+.tsviz .outline__where {
+  /* Gives way to the name first, then truncates from the start of the path. */
+  flex: 0 1 auto;
+  min-width: 3em;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  color: var(--tsviz-muted);
+  font-size: 11px;
+}
+
+/* Until toggled, the list is open on wide canvases and closed on narrow ones. */
+.tsviz .outline--closed.outline--auto {
+  display: none;
+}
+
+@container tsviz-layout (max-width: 719px) {
+  .tsviz .outline--auto:not(.outline--closed) {
+    display: none;
+  }
+
+  .tsviz .outline--closed.outline--auto {
+    display: block;
+  }
+}

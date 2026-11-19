@@ -25,14 +25,16 @@ To show a different graph, remount the component (for example with `key`).
 
 ## Props
 
-| prop              | default  | meaning                                                             |
-| ----------------- | -------- | ------------------------------------------------------------------- |
-| `graph`           | required | The graph to draw. Validate untrusted JSON with `parseGraph` first. |
-| `direction`       | `"DOWN"` | `"DOWN"` (top to bottom) or `"RIGHT"` (left to right)               |
-| `colorScheme`     | `"auto"` | `"light"`, `"dark"`, or `"auto"` to follow the system preference    |
-| `theme`           | none     | Design token overrides; see below                                   |
-| `layoutWorkerUrl` | none     | URL of `elkjs/lib/elk-worker.min.js`, to run layout in a Web Worker |
-| `className`       | none     | Added to the root element, next to `tsviz`                          |
+| prop              | default  | meaning                                                                                                          |
+| ----------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `graph`           | required | The graph to draw. Validate untrusted JSON with `parseGraph` first.                                              |
+| `direction`       | `"DOWN"` | `"DOWN"` (top to bottom) or `"RIGHT"` (left to right)                                                            |
+| `colorScheme`     | `"auto"` | `"light"`, `"dark"`, or `"auto"` to follow the system preference                                                 |
+| `theme`           | none     | Design token overrides; see below                                                                                |
+| `layoutWorkerUrl` | none     | URL of `elkjs/lib/elk-worker.min.js`, to run layout in a Web Worker                                              |
+| `initialFocus`    | none     | Id of a declaration to select and zoom in on, instead of fitting the whole graph, when the canvas first lays out |
+| `outline`         | `true`   | Shows the declarations list beside the canvas: every declaration by kind, with a filter; picking one centres it  |
+| `className`       | none     | Added to the root element, next to `tsviz`                                                                       |
 
 ## Layout in a worker
 

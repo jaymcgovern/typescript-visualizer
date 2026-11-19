@@ -99,6 +99,15 @@ export function filterHighlight(nodes: FilterNode[], edges: FilterEdge[], hover:
   return { activeNodes, activeEdges, targetNodes: new Set(), fadeNodes: true, fadeEdges: true };
 }
 
+/** `set` with `item` added, or removed if it was there. */
+export function toggle<T>(set: ReadonlySet<T>, item: T): Set<T> {
+  const next = new Set(set);
+
+  if (!next.delete(item)) next.add(item);
+
+  return next;
+}
+
 export function countBy<T, K>(items: T[], key: (item: T) => K): Map<K, number> {
   const counts = new Map<K, number>();
 

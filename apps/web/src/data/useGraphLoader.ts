@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GraphLoadError, initialGraphUrl, loadGraphFromFile, loadGraphFromUrl, type LoadedGraph } from "./loadGraph";
 
-/** A successfully loaded graph; `loadId` changes on every load, even of the same source. */
+/**
+ * A successfully loaded graph; `loadId` changes on every load, even of the same
+ * source. `initial` marks the graph loaded at startup (`?graph=` or the sample).
+ */
 export interface Shown {
   loaded: LoadedGraph;
   loadId: number;
+  initial: boolean;
 }
 
 export type LoadState =
@@ -22,15 +26,15 @@ export function useGraphLoader() {
   // Ignores results from a load that a newer one has superseded.
   const generation = useRef(0);
 
-  const run = useCallback((source: string, load: () => Promise<LoadedGraph>) => {
+  const run = useCallback((source: string, load: () => Promise<LoadedGraph>, initial = false) => {
     const gen = ++generation.current;
 
     setState({ status: "loading", source, previous: current.current });
     load().then(
       (loaded) => {
         if (gen !== generation.current) return;
-        current.current = { loaded, loadId: gen };
-        setState({ status: "ready", loaded, loadId: gen });
+        current.current = { loaded, loadId: gen, initial };
+        setState({ status: "ready", ...current.current });
       },
       (err: unknown) => {
         if (gen !== generation.current) return;
@@ -47,8 +51,10 @@ export function useGraphLoader() {
   }, []);
 
   useEffect(() => {
-    loadUrl(initialGraphUrl());
-  }, [loadUrl]);
+    const url = initialGraphUrl();
+
+    run(url, () => loadGraphFromUrl(url), true);
+  }, [run]);
 
   return { state, loadUrl, loadFile, dismissError };
 }

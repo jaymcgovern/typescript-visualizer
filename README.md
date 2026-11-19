@@ -46,6 +46,10 @@ those imports at `src/`, and tsx, Vitest, Vite and `tsc --noEmit` all enable it,
 so nothing needs building during development. Published builds resolve to
 `dist/` instead.
 
+The demo takes `?graph=<url>` to load a graph other than the sample, and
+`?focus=<declaration id>` (e.g. `?focus=fixtures%2Fclasses%2Fdog.ts%23Dog`) to
+open zoomed in on that card instead of the whole graph.
+
 [fixtures/](fixtures) holds the TypeScript the tests analyze.
 `fixtures/fixtures.graph.json` is their graph. The UI tests and the demo's
 sample use it, and a parser test fails when it is out of date. Regenerate it

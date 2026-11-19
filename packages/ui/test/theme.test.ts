@@ -39,7 +39,7 @@ describe("styles.css and the theme stay in sync", () => {
   it("scopes every rule under .tsviz", () => {
     const selectors = css
       .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/@media[^{]*\{/g, "")
+      .replace(/@(media|container)[^{]*\{/g, "")
       .match(/[^{}]+(?=\{)/g)!
       // Commas outside parentheses, so `:not(.a, .b)` stays whole.
       .flatMap((s) => s.split(/,(?![^(]*\))/))

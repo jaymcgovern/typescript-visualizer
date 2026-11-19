@@ -20,8 +20,9 @@ import {
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { Graph } from "@tsviz/graph";
-import { detailAt } from "../graph/detail.ts";
+import { DETAIL_MIN_ZOOM, detailAt } from "../graph/detail.ts";
 import { computeHighlight, type Highlight, type HoverTarget } from "../graph/highlight.ts";
+import { outlineEntries } from "../graph/outline.ts";
 import { OUT_HANDLE } from "../graph/ports.ts";
 import {
   applyEdgeLayout,
@@ -43,6 +44,7 @@ import {
   filteredOut,
   filterHighlight,
   NO_FILTERS,
+  toggle,
   type FilterHover,
   type Filters,
 } from "../graph/filters.ts";
@@ -54,6 +56,7 @@ import { ElkEdge } from "./ElkEdge.tsx";
 import { CardActionsContext, LitPartsContext, type CardActions } from "./hover.ts";
 import { RelationshipPopover } from "./RelationshipPopover.tsx";
 import { FilterBar } from "./FilterBar.tsx";
+import { Outline } from "./Outline.tsx";
 import { TypeNode } from "./TypeNode.tsx";
 
 const edgeTypes: EdgeTypes = { elk: ElkEdge };
@@ -82,6 +85,18 @@ export interface GraphCanvasProps {
    * With Vite: `import url from "elkjs/lib/elk-worker.min.js?url"`.
    */
   layoutWorkerUrl?: string;
+  /**
+   * Id of a declaration to select and zoom in on once the first layout lands,
+   * instead of fitting the whole graph. Read once, when the canvas mounts; an
+   * id not in the graph fits the whole graph as usual.
+   */
+  initialFocus?: string;
+  /**
+   * Shows the declarations list beside the canvas: every declaration by kind,
+   * with a filter, for jumping to a card. Default `true`. It starts collapsed
+   * when the canvas is narrower than 720px.
+   */
+  outline?: boolean;
   className?: string;
 }
 
@@ -111,6 +126,8 @@ interface FlowProps {
   direction?: Direction;
   colorScheme: ColorScheme;
   layoutWorkerUrl?: string;
+  initialFocus?: string;
+  outline?: boolean;
   /** The `.tsviz` element, whose computed font the edge labels use. */
   root: RefObject<HTMLDivElement | null>;
 }
@@ -121,7 +138,15 @@ interface FlowProps {
  * pressing "Re-layout" reruns ELK and refits the view; a card changing size
  * (e.g. expanding its members) reruns ELK and keeps the viewport.
  */
-function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }: FlowProps) {
+function Flow({
+  graph,
+  direction = "DOWN",
+  colorScheme,
+  layoutWorkerUrl,
+  initialFocus,
+  outline = true,
+  root,
+}: FlowProps) {
   const initial = useMemo(() => toFlow(graph), [graph]);
   const [nodes, setNodes, onNodesChange] = useNodesState<DeclNode>(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<DeclEdge>(initial.edges);
@@ -226,10 +251,21 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
   // Fits the view in the commit that applied a layout (calling fitView next to
   // setNodes would measure the old positions). React Flow syncs controlled nodes
   // into its store in a child effect, which runs before this one. Snaps to the
-  // first layout, animates later ones.
+  // first layout, animates later ones. The first one zooms in on the
+  // `initialFocus` card instead, if there is one: close enough to read it in
+  // full, but no closer than 100%.
+  const focusFirst = useRef(initialFocus);
   useEffect(() => {
-    if (fitRequest > 0) void fitView({ padding: 0.08, duration: fitRequest > 1 ? 300 : 0 });
-  }, [fitRequest, fitView]);
+    if (fitRequest === 0) return;
+    const focus = fitRequest === 1 ? focusFirst.current : undefined;
+
+    if (focus !== undefined && getInternalNode(focus)) {
+      store.getState().addSelectedNodes([focus]);
+      void fitView({ nodes: [{ id: focus }], padding: 0.2, minZoom: DETAIL_MIN_ZOOM.full, maxZoom: 1, duration: 0 });
+    } else {
+      void fitView({ padding: 0.08, duration: fitRequest > 1 ? 300 : 0 });
+    }
+  }, [fitRequest, fitView, getInternalNode, store]);
 
   // Pans by how far the resized card moved, in the commit that moved it (as for fitView above).
   useEffect(() => {
@@ -329,32 +365,39 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
   const actions = useMemo<CardActions>(
     () => ({
       setHover,
-      focus: (id) => {
+      focus: (id, options) => {
         const node = getInternalNode(id);
 
         if (!node) return;
         store.getState().addSelectedNodes([id]);
         setHover(undefined);
         const { x, y } = node.internals.positionAbsolute;
+        const zoom = getZoom();
 
         void setCenter(x + (node.measured.width ?? 0) / 2, y + (node.measured.height ?? 0) / 2, {
-          zoom: getZoom(),
+          zoom: options?.zoomIn && zoom < DETAIL_MIN_ZOOM.full ? 1 : zoom,
           duration: 300,
         });
       },
     }),
     [getInternalNode, store, setCenter, getZoom],
   );
-  // A dropped reference's declaration may be filtered out (faded and unclickable): show its kind again first.
-  const goToDropped = useCallback(
-    (id: string) => {
+  // A declaration picked from a list may be filtered out (faded and unclickable): show its kind again first.
+  const reveal = useCallback(
+    (id: string, options?: { zoomIn?: boolean }) => {
       const kind = graph.nodes.find((n) => n.id === id)?.kind;
 
       if (kind) setFilters((f) => (f.kinds.has(kind) ? { ...f, kinds: toggle(f.kinds, kind) } : f));
-      actions.focus(id);
+      actions.focus(id, options);
     },
     [graph, actions],
   );
+  const goToListed = useCallback((id: string) => reveal(id, { zoomIn: true }), [reveal]);
+  const hoverListed = useCallback((id: string | undefined) => setHover(id ? { node: id } : undefined), []);
+  const entries = useMemo(() => outlineEntries(graph.nodes), [graph]);
+  const selectedIds = useMemo(() => new Set(focusKey ? focusKey.split("\n") : []), [focusKey]);
+  // Undefined until toggled: open unless the canvas is narrow (decided in CSS).
+  const [outlineOpen, setOutlineOpen] = useState<boolean | undefined>(undefined);
   const shownNodes = useMemo(() => withNodeHighlight(nodes, highlight, off.nodes), [nodes, highlight, off]);
   const shownEdges = useMemo(() => withEdgeHighlight(edges, highlight, off.edges), [edges, highlight, off]);
 
@@ -398,65 +441,80 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
     // Wraps ReactFlow itself: nodes are rendered outside its children.
     <CardActionsContext.Provider value={actions}>
       <LitPartsContext.Provider value={lit}>
-        <ReactFlow
-          className={`flow flow--${detail}${hidden ? " flow--measuring" : ""}`}
-          data-layout={status.state}
-          nodes={shownNodes}
-          edges={shownEdges}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={onEdgesChange}
-          onEdgeMouseEnter={(_, edge) => setHoveredEdge(edge.id)}
-          onEdgeMouseLeave={() => setHoveredEdge(undefined)}
-          onEdgeClick={(e, edge) =>
-            setClicked({ edge: edge.id, at: screenToFlowPosition({ x: e.clientX, y: e.clientY }) })
-          }
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodesConnectable={false}
-          colorMode={colorScheme === "auto" ? "system" : colorScheme}
-          minZoom={0.05}
-        >
-          <EdgeMarkers />
-          {selected && selectedSource && selectedTarget && popoverAt && (
-            <RelationshipPopover
-              rel={selected.data!.rel}
-              source={selectedSource.data.decl}
-              target={selectedTarget.data.decl}
-              anchor={popoverAt}
-              onClose={clearSelection}
-              onGoTo={actions.focus}
+        <div className="tsviz__layout">
+          {outline && (
+            <Outline
+              entries={entries}
+              fadedKinds={filters.kinds}
+              selected={selectedIds}
+              open={outlineOpen}
+              onOpenChange={setOutlineOpen}
+              onGoTo={goToListed}
+              onHover={hoverListed}
             />
           )}
-          <Background gap={24} />
-          <Controls showInteractive={false} />
-          <MiniMap pannable zoomable nodeClassName={(n) => n.className ?? ""} />
-          <Panel position="bottom-center" className="filter-panel">
-            <FilterBar
-              nodeCounts={nodeCounts}
-              edgeCounts={edgeCounts}
-              filters={filters}
-              onToggleKind={(kind) => setFilters((f) => ({ ...f, kinds: toggle(f.kinds, kind) }))}
-              onToggleFamily={(family) => setFilters((f) => ({ ...f, families: toggle(f.families, family) }))}
-              onHover={setFilterHover}
-              {...(dropped ? { dropped } : {})}
-              onGoTo={goToDropped}
-            />
-          </Panel>
-          <Panel position="top-right">
-            <button type="button" onClick={relayout} disabled={status.state === "running"}>
-              Re-layout
-            </button>
-          </Panel>
-          {status.state !== "done" && (
-            <Panel position="top-center" className={status.state === "error" ? "chip chip--error" : "chip"}>
-              {status.state === "error"
-                ? `Layout failed: ${status.message}`
-                : status.state === "measuring"
-                  ? "Measuring…"
-                  : "Laying out…"}
-            </Panel>
-          )}
-        </ReactFlow>
+          <div className="tsviz__canvas">
+            <ReactFlow
+              className={`flow flow--${detail}${hidden ? " flow--measuring" : ""}`}
+              data-layout={status.state}
+              nodes={shownNodes}
+              edges={shownEdges}
+              onNodesChange={handleNodesChange}
+              onEdgesChange={onEdgesChange}
+              onEdgeMouseEnter={(_, edge) => setHoveredEdge(edge.id)}
+              onEdgeMouseLeave={() => setHoveredEdge(undefined)}
+              onEdgeClick={(e, edge) =>
+                setClicked({ edge: edge.id, at: screenToFlowPosition({ x: e.clientX, y: e.clientY }) })
+              }
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              nodesConnectable={false}
+              colorMode={colorScheme === "auto" ? "system" : colorScheme}
+              minZoom={0.05}
+            >
+              <EdgeMarkers />
+              {selected && selectedSource && selectedTarget && popoverAt && (
+                <RelationshipPopover
+                  rel={selected.data!.rel}
+                  source={selectedSource.data.decl}
+                  target={selectedTarget.data.decl}
+                  anchor={popoverAt}
+                  onClose={clearSelection}
+                  onGoTo={actions.focus}
+                />
+              )}
+              <Background gap={24} />
+              <Controls showInteractive={false} />
+              <MiniMap pannable zoomable nodeClassName={(n) => n.className ?? ""} />
+              <Panel position="bottom-center" className="filter-panel">
+                <FilterBar
+                  nodeCounts={nodeCounts}
+                  edgeCounts={edgeCounts}
+                  filters={filters}
+                  onToggleKind={(kind) => setFilters((f) => ({ ...f, kinds: toggle(f.kinds, kind) }))}
+                  onToggleFamily={(family) => setFilters((f) => ({ ...f, families: toggle(f.families, family) }))}
+                  onHover={setFilterHover}
+                  {...(dropped ? { dropped } : {})}
+                  onGoTo={reveal}
+                />
+              </Panel>
+              <Panel position="top-right">
+                <button type="button" onClick={relayout} disabled={status.state === "running"}>
+                  Re-layout
+                </button>
+              </Panel>
+              {status.state !== "done" && (
+                <Panel position="top-center" className={status.state === "error" ? "chip chip--error" : "chip"}>
+                  {status.state === "error"
+                    ? `Layout failed: ${status.message}`
+                    : status.state === "measuring"
+                      ? "Measuring…"
+                      : "Laying out…"}
+                </Panel>
+              )}
+            </ReactFlow>
+          </div>
+        </div>
       </LitPartsContext.Provider>
     </CardActionsContext.Provider>
   );
@@ -498,14 +556,6 @@ function withEdgeHighlight(edges: DeclEdge[], h: Highlight, filtered: Set<string
 }
 
 /** A copy of `set` with `item` added, or removed if it was there. */
-function toggle<T>(set: ReadonlySet<T>, item: T): Set<T> {
-  const next = new Set(set);
-
-  if (!next.delete(item)) next.add(item);
-
-  return next;
-}
-
 /** The middle bend (or point) of an edge's route, in flow coordinates. */
 function routeMiddle(edge: DeclEdge): XY | undefined {
   const points = edge.data?.route?.points;
