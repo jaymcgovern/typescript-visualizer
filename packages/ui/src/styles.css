@@ -173,6 +173,42 @@
   min-width: 220px;
 }
 
+/* Resized by hand: React Flow sizes the node, and the card fills it. */
+.tsviz .card--resized {
+  width: 100%;
+  max-width: none;
+}
+
+/*
+ * Drag handle on the right edge of a card with cut-off text: a wide, invisible
+ * hit area that shows a line in the kind colour on hover.
+ */
+.tsviz .react-flow__resize-control.card__resize {
+  width: 9px;
+  border: 0;
+  background: none;
+  z-index: 1;
+}
+
+.tsviz .react-flow__resize-control.card__resize::after {
+  content: "";
+  position: absolute;
+  inset: 8px 3px;
+  border-radius: 2px;
+  background: var(--tsviz-kind-color);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tsviz .react-flow__node:hover .card__resize::after {
+  opacity: 0.35;
+}
+
+.tsviz .react-flow__resize-control.card__resize:hover::after,
+.tsviz .react-flow__resize-control.card__resize:active::after {
+  opacity: 1;
+}
+
 .tsviz .react-flow__node.selected .card {
   outline: 2px solid var(--tsviz-kind-color);
   outline-offset: 2px;
