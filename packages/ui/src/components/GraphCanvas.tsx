@@ -354,8 +354,8 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
 
   return (
     // Wraps ReactFlow itself: nodes are rendered outside its children.
-    <CardActionsContext value={actions}>
-      <LitPartsContext value={lit}>
+    <CardActionsContext.Provider value={actions}>
+      <LitPartsContext.Provider value={lit}>
         <ReactFlow
           className={`flow flow--${detail}${hidden ? " flow--measuring" : ""}`}
           data-layout={status.state}
@@ -415,8 +415,8 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
             </Panel>
           )}
         </ReactFlow>
-      </LitPartsContext>
-    </CardActionsContext>
+      </LitPartsContext.Provider>
+    </CardActionsContext.Provider>
   );
 }
 
