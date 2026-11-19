@@ -15,6 +15,7 @@ import {
   useStoreApi,
   type EdgeTypes,
   type NodeChange,
+  type NodeDimensionChange,
   type NodeTypes,
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
@@ -125,10 +126,17 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
   const [nodes, setNodes, onNodesChange] = useNodesState<DeclNode>(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<DeclEdge>(initial.edges);
   const measured = useNodesInitialized();
-  const { getNodes, getEdges, getInternalNode, fitView, setCenter, getZoom, screenToFlowPosition } = useReactFlow<
-    DeclNode,
-    DeclEdge
-  >();
+  const {
+    getNodes,
+    getEdges,
+    getInternalNode,
+    fitView,
+    setCenter,
+    getZoom,
+    getViewport,
+    setViewport,
+    screenToFlowPosition,
+  } = useReactFlow<DeclNode, DeclEdge>();
   const store = useStoreApi<DeclNode, DeclEdge>();
   const [status, setStatus] = useState<LayoutStatus>({ state: "measuring" });
   const [nonce, setNonce] = useState(0);
@@ -149,6 +157,10 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
   );
   // Ignores a layout that a newer request has superseded.
   const generation = useRef(0);
+  // A card just resized by hand, and where it was: the next layout pans the view so it stays put on screen.
+  const resizedCard = useRef<{ id: string; at: XY } | undefined>(undefined);
+  // How far to pan the view once the layout that moved the resized card has been applied.
+  const [panRequest, setPanRequest] = useState<XY | undefined>(undefined);
 
   useEffect(() => {
     const key = `${direction}:${nonce}`;
@@ -161,6 +173,9 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
     }
 
     const gen = ++generation.current;
+    const anchor = resizedCard.current;
+
+    resizedCard.current = undefined;
     const current = getNodes();
     // Member-row ports (RIGHT only): where each edge leaves, and where React Flow measured those handles.
     const handles = sourceHandles(current, direction);
@@ -184,6 +199,10 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
         if (fitNext.current) {
           fitNext.current = false;
           setFitRequest((c) => c + 1);
+        } else if (anchor) {
+          const to = layout.positions.get(anchor.id);
+
+          if (to) setPanRequest({ x: to.x - anchor.at.x, y: to.y - anchor.at.y });
         }
       },
       (err: unknown) => {
@@ -212,18 +231,39 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
     if (fitRequest > 0) void fitView({ padding: 0.08, duration: fitRequest > 1 ? 300 : 0 });
   }, [fitRequest, fitView]);
 
+  // Pans by how far the resized card moved, in the commit that moved it (as for fitView above).
+  useEffect(() => {
+    if (!panRequest) return;
+    const { x, y, zoom } = getViewport();
+
+    void setViewport({ x: x - panRequest.x * zoom, y: y - panRequest.y * zoom, zoom });
+  }, [panRequest, getViewport, setViewport]);
+
   const relayout = useCallback(() => {
     fitNext.current = true;
     setNonce((n) => n + 1);
   }, []);
 
-  // A card that no longer has the size it was laid out with gets a fresh layout.
+  // True while a card's width is being dragged (see TypeNode).
+  const resizing = useRef(false);
+
+  // A card that no longer has the size it was laid out with gets a fresh
+  // layout; one being resized gets it once the drag ends, not on every step,
+  // and stays where it is on screen while the others move around it.
   const handleNodesChange = useCallback(
     (changes: NodeChange<DeclNode>[]) => {
       onNodesChange(changes);
       const sizes = laidOutSizes.current;
+      const resizeEnd = changes.find((c): c is NodeDimensionChange => c.type === "dimensions" && c.resizing === false);
 
-      if (!sizes) return;
+      if (changes.some((c) => c.type === "dimensions" && c.resizing === true)) resizing.current = true;
+      if (resizeEnd) {
+        const at = getInternalNode(resizeEnd.id)?.position;
+
+        resizing.current = false;
+        if (at) resizedCard.current = { id: resizeEnd.id, at: { ...at } };
+      }
+      if (!sizes || resizing.current) return;
       const resized = changes.some((c) => {
         if (c.type !== "dimensions" || !c.dimensions) return false;
         const before = sizes.get(c.id);
@@ -236,8 +276,10 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
       });
 
       if (resized) setNonce((n) => n + 1);
+      // Dragged without changing size: nothing to lay out, so nothing to keep in place.
+      else if (resizeEnd) resizedCard.current = undefined;
     },
-    [onNodesChange],
+    [onNodesChange, getInternalNode],
   );
 
   // If the first layout fails, show the measuring grid rather than nothing.

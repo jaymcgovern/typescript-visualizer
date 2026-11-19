@@ -1,6 +1,15 @@
-import { Handle, Position, useReactFlow, useStore, type NodeProps } from "@xyflow/react";
-import { memo, useContext, useMemo, type CSSProperties } from "react";
+import {
+  Handle,
+  NodeResizeControl,
+  Position,
+  ResizeControlVariant,
+  useReactFlow,
+  useStore,
+  type NodeProps,
+} from "@xyflow/react";
+import { memo, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { cardView, type BodyRow } from "../graph/cardBody.ts";
+import { canWiden, widthRange, type WidthRange } from "../graph/cardWidth.ts";
 import { codeSpans, docSummary, KIND_BADGE } from "../graph/declaration.ts";
 import { detailAt } from "../graph/detail.ts";
 import type { HoverTarget } from "../graph/highlight.ts";
@@ -21,12 +30,21 @@ import { CardActionsContext, LitPartsContext } from "./hover.ts";
  * Zoomed out, the same box is drawn with less detail (see `detailAt`): the
  * full card stays in the DOM and sets the size, so changing level never
  * changes a node's size.
+ *
+ * When its header, heritage or member rows are cut off, the card's right edge
+ * can be dragged to widen it, up to the width that shows them all in full
+ * (see `useWidthRange`).
  */
 export const TypeNode = memo(function TypeNode({ id, data, sourcePosition, targetPosition }: NodeProps<DeclNode>) {
   const { decl, degree, out, refs, expanded = false } = data;
   const { updateNodeData } = useReactFlow<DeclNode>();
   // Re-renders only when the zoom crosses a level, not on every zoom step.
   const detail = useStore((s) => detailAt(s.transform[2]));
+  // Set once the card has been resized; React Flow then sizes the node, and the card fills it.
+  const resized = useStore((s) => s.nodeLookup.get(id)?.width !== undefined);
+  const resizing = useStore((s) => s.nodeLookup.get(id)?.resizing ?? false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const range = useWidthRange(cardRef, detail === "full" && !resizing);
   const { setHover, focus } = useContext(CardActionsContext);
   // The parts of this card a selected edge comes from.
   const litContext = useContext(LitPartsContext);
@@ -52,11 +70,13 @@ export const TypeNode = memo(function TypeNode({ id, data, sourcePosition, targe
     `card--${decl.kind}`,
     decl.exported ? "" : "card--local",
     summary ? "card--doc" : "",
+    resized ? "card--resized" : "",
     `card--${detail}`,
   ];
 
   return (
     <div
+      ref={cardRef}
       className={classes.filter(Boolean).join(" ")}
       onMouseEnter={() => setHover({ node: id })}
       onMouseLeave={() => setHover(undefined)}
@@ -163,9 +183,73 @@ export const TypeNode = memo(function TypeNode({ id, data, sourcePosition, targe
         </div>
       )}
       <Handle id={OUT_HANDLE} type="source" position={sourcePosition!} isConnectable={false} />
+      {detail === "full" && canWiden(range) && (
+        <NodeResizeControl
+          variant={ResizeControlVariant.Line}
+          position="right"
+          className="card__resize"
+          minWidth={range.min}
+          maxWidth={range.max}
+        />
+      )}
     </div>
   );
 });
+
+/**
+ * The widths the card can be resized between, measured from its header,
+ * heritage and member rows while they are drawn (`active`), and again whenever the card changes size.
+ * Not while it is being resized: React Flow reads the bounds on every drag
+ * step, so they must hold still until the drag ends.
+ */
+function useWidthRange(cardRef: RefObject<HTMLDivElement | null>, active: boolean): WidthRange | undefined {
+  const [range, setRange] = useState<WidthRange | undefined>(undefined);
+
+  useEffect(() => {
+    const card = cardRef.current;
+
+    if (!card || !active) return;
+    const measure = () => {
+      const lines = [
+        // The header and member rows: flex items that shrink, each cut off on its own.
+        ...[...card.querySelectorAll(".card__header, .card__line")].map((line) =>
+          [
+            ...line.querySelectorAll<HTMLElement>(
+              ":scope > .card__name, :scope > .card__inline, :scope > .card__member, :scope > .card__rest",
+            ),
+          ].map((part) => ({ scrollWidth: part.scrollWidth, clientWidth: part.clientWidth })),
+        ),
+        // Heritage: one padded block of text, compared with the space inside its padding.
+        ...[...card.querySelectorAll<HTMLElement>(".card__heritage")].map((block) => {
+          const text = block.querySelector<HTMLElement>(".card__text");
+          const style = getComputedStyle(block);
+          const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+
+          return text ? [{ scrollWidth: text.offsetWidth, clientWidth: Math.floor(block.clientWidth - padding) }] : [];
+        }),
+      ];
+      // React Flow gives the node an inline width once it has been resized. Read
+      // from the DOM, as the first resize step can be observed before a rerender.
+      const resized = Boolean(card.parentElement?.style.width);
+
+      setRange((prev) => {
+        const next = widthRange(card.offsetWidth, lines, resized, prev);
+
+        return prev && prev.min === next.min && prev.max === next.max ? prev : next;
+      });
+    };
+
+    measure();
+    // Catches expanding members, late-loading fonts and the resize itself.
+    const observer = new ResizeObserver(measure);
+
+    observer.observe(card);
+
+    return () => observer.disconnect();
+  }, [cardRef, active]);
+
+  return range;
+}
 
 function plural(n: number, noun: string): string {
   return `${n} ${noun}${n === 1 ? "" : "s"}`;
