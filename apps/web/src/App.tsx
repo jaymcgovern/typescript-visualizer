@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from "react";
 import { GraphCanvas, type Direction } from "@tsviz/ui";
 import elkWorkerUrl from "elkjs/lib/elk-worker.min.js?url";
+import { initialFocusId } from "./data/loadGraph";
 import { useGraphLoader } from "./data/useGraphLoader";
 
 export function App() {
@@ -94,6 +95,7 @@ export function App() {
             graph={shown.loaded.graph}
             direction={direction}
             layoutWorkerUrl={elkWorkerUrl}
+            initialFocus={shown.initial ? initialFocusId() : undefined}
           />
         ) : state.status === "loading" ? (
           <p className="placeholder">Loading {state.source}…</p>

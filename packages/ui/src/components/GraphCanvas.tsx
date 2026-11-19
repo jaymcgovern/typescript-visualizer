@@ -19,7 +19,7 @@ import {
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { Graph } from "@tsviz/graph";
-import { detailAt } from "../graph/detail.ts";
+import { DETAIL_MIN_ZOOM, detailAt } from "../graph/detail.ts";
 import { computeHighlight, type Highlight, type HoverTarget } from "../graph/highlight.ts";
 import { OUT_HANDLE } from "../graph/ports.ts";
 import {
@@ -81,6 +81,12 @@ export interface GraphCanvasProps {
    * With Vite: `import url from "elkjs/lib/elk-worker.min.js?url"`.
    */
   layoutWorkerUrl?: string;
+  /**
+   * Id of a declaration to select and zoom in on once the first layout lands,
+   * instead of fitting the whole graph. Read once, when the canvas mounts; an
+   * id not in the graph fits the whole graph as usual.
+   */
+  initialFocus?: string;
   className?: string;
 }
 
@@ -110,6 +116,7 @@ interface FlowProps {
   direction?: Direction;
   colorScheme: ColorScheme;
   layoutWorkerUrl?: string;
+  initialFocus?: string;
   /** The `.tsviz` element, whose computed font the edge labels use. */
   root: RefObject<HTMLDivElement | null>;
 }
@@ -120,7 +127,7 @@ interface FlowProps {
  * pressing "Re-layout" reruns ELK and refits the view; a card changing size
  * (e.g. expanding its members) reruns ELK and keeps the viewport.
  */
-function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }: FlowProps) {
+function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, initialFocus, root }: FlowProps) {
   const initial = useMemo(() => toFlow(graph), [graph]);
   const [nodes, setNodes, onNodesChange] = useNodesState<DeclNode>(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<DeclEdge>(initial.edges);
@@ -207,10 +214,21 @@ function Flow({ graph, direction = "DOWN", colorScheme, layoutWorkerUrl, root }:
   // Fits the view in the commit that applied a layout (calling fitView next to
   // setNodes would measure the old positions). React Flow syncs controlled nodes
   // into its store in a child effect, which runs before this one. Snaps to the
-  // first layout, animates later ones.
+  // first layout, animates later ones. The first one zooms in on the
+  // `initialFocus` card instead, if there is one: close enough to read it in
+  // full, but no closer than 100%.
+  const focusFirst = useRef(initialFocus);
   useEffect(() => {
-    if (fitRequest > 0) void fitView({ padding: 0.08, duration: fitRequest > 1 ? 300 : 0 });
-  }, [fitRequest, fitView]);
+    if (fitRequest === 0) return;
+    const focus = fitRequest === 1 ? focusFirst.current : undefined;
+
+    if (focus !== undefined && getInternalNode(focus)) {
+      store.getState().addSelectedNodes([focus]);
+      void fitView({ nodes: [{ id: focus }], padding: 0.2, minZoom: DETAIL_MIN_ZOOM.full, maxZoom: 1, duration: 0 });
+    } else {
+      void fitView({ padding: 0.08, duration: fitRequest > 1 ? 300 : 0 });
+    }
+  }, [fitRequest, fitView, getInternalNode, store]);
 
   const relayout = useCallback(() => {
     fitNext.current = true;
