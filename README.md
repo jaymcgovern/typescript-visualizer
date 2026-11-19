@@ -50,3 +50,7 @@ so nothing needs building during development. Published builds resolve to
 `fixtures/fixtures.graph.json` is their graph. The UI tests and the demo's
 sample use it, and a parser test fails when it is out of date. Regenerate it
 with `npx vitest run --project parser -u`.
+
+## License
+
+[MIT](LICENSE) © Jay McGovern

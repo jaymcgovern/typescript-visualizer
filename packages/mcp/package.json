@@ -2,7 +2,7 @@
   "name": "@tsviz/mcp",
   "version": "0.1.0",
   "description": "Serve a TypeScript declaration graph to AI agents over MCP",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jaymcgovern/typescript-visualizer",
