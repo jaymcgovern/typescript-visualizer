@@ -1,6 +1,6 @@
 {
   "name": "@tsviz/web",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@tsviz/graph": "^0.1.0",
-    "@tsviz/ui": "^0.2.0",
+    "@tsviz/ui": "^0.3.0",
     "@xyflow/react": "^12.12.1",
     "elkjs": "^0.12.1",
     "react": "^19.3.1",
