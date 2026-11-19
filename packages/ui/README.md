@@ -33,6 +33,7 @@ To show a different graph, remount the component (for example with `key`).
 | `theme`           | none     | Design token overrides; see below                                                                                |
 | `layoutWorkerUrl` | none     | URL of `elkjs/lib/elk-worker.min.js`, to run layout in a Web Worker                                              |
 | `initialFocus`    | none     | Id of a declaration to select and zoom in on, instead of fitting the whole graph, when the canvas first lays out |
+| `outline`         | `true`   | Shows the declarations list beside the canvas: every declaration by kind, with a filter; picking one centres it  |
 | `className`       | none     | Added to the root element, next to `tsviz`                                                                       |
 
 ## Layout in a worker
